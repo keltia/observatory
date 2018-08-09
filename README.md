@@ -16,11 +16,13 @@ Go wrapper for [Mozilla Observatory](https://observatory.mozilla.org/) API.
 
 * Go >= 1.10
 
+`github.com/keltia/observatory` is a Go module (you can use either Go 1.10 with `vgo` or 1.11+).  The API exposed follows the Semantic Versioning scheme to guarantee a consistent API compatibility.
+
 ## USAGE
 
 There is a small example program included in `cmd/getgrade` to either show the grade of a given site or JSON dump of the detailed report.
 
-You can use `jq` to display the output of `getgrade -d <site>` in a colorised way:
+You can use [`jq`](https://stedolan.github.io/jq/) to display the output of `getgrade -d <site>` in a colorised way:
 
     getgrade -d observatory.mozilla.org | jq .
 
@@ -30,20 +32,21 @@ As with many API wrappers, you will need to first create a client with some opti
 
 ``` go
     // Simplest way
-    c := observatory.NewClient()
+    c, _ := observatory.NewClient()
     grade, err := c.GetScore("example.com")
     if err != nil {
         log.Fatalf("error: %v", err)
     }
 
 
-    // With some options, timeout at 15s and debug-like verbosity
+    // With some options, timeout at 15s, caching for 10s and debug-like verbosity
     cnf := observatory.Config{
         Timeout:15,
         Log:2,
+        Cache: 10,
     }
-    c := observatory.NewClient(cnf)
-    report, err := c.GetDetailedReport("foo.xxx")
+    c, err := observatory.NewClient(cnf)
+    report, err := c.GetScanReport("foo.xxx")
     if err != nil {
         log.Fatalf("error: %v", err)
     }
