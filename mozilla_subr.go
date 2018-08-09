@@ -1,0 +1,146 @@
+package observatory
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/pkg/errors"
+	"net/url"
+)
+
+// Private area
+
+func myRedirect(req *http.Request, via []*http.Request) error {
+	return nil
+}
+
+// AddQueryParameters adds query parameters to the URL.
+func AddQueryParameters(baseURL string, queryParams map[string]string) string {
+	baseURL += "?"
+	params := url.Values{}
+	for key, value := range queryParams {
+		params.Add(key, value)
+	}
+	return baseURL + params.Encode()
+}
+
+// prepareRequest insert all pre-defined stuff
+func (c *Client) prepareRequest(method, what string, opts map[string]string) (req *http.Request) {
+	var endPoint string
+
+	// This is a hack to fetch direct urls for results
+	if c.baseurl != "" {
+		endPoint = fmt.Sprintf("%s/%s/", c.baseurl, what)
+	} else {
+		endPoint = fmt.Sprintf("%s/%s/", baseURL, what)
+	}
+
+	c.verbose("Options:\n%v", opts)
+	baseURL := AddQueryParameters(endPoint, opts)
+
+	req, _ = http.NewRequest(method, baseURL, nil)
+
+	// We need these when we POST
+	if method == "POST" {
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", "application/json")
+	}
+
+	return
+}
+
+func (c *Client) callAPI(site, word, cmd, sbody string) ([]byte, error) {
+
+	str := fmt.Sprintf("%s/%s?host=%s", c.baseurl, cmd, site)
+
+	c.debug("str=%s", str)
+	req, err := http.NewRequest(word, str, nil)
+	if err != nil {
+		log.Printf("error: req is nil: %v", err)
+		return []byte{}, errors.Wrap(err, "req is nil")
+	}
+
+	c.debug("req=%#v", req)
+	c.debug("clt=%#v", c.client)
+
+	// If we have a POST and a body, insert them.
+	if sbody != "" && word == "POST" {
+		body := []byte(sbody)
+		buf := bytes.NewReader(body)
+		req.Body = ioutil.NopCloser(buf)
+		req.ContentLength = int64(buf.Len())
+	}
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		c.verbose("err=%#v", err)
+		return []byte{}, errors.Wrap(err, "1st call failed")
+	}
+	c.debug("resp=%#v", resp)
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, "can not read body")
+	}
+
+	if resp.StatusCode == http.StatusOK {
+
+		c.debug("status OK")
+
+		if string(body) == "pending" {
+			time.Sleep(10 * time.Second)
+			resp, err = c.client.Do(req)
+			if err != nil {
+				return body, errors.Wrap(err, "pending failed")
+			}
+			c.verbose("resp was %v", resp)
+		}
+	} else if resp.StatusCode == http.StatusFound {
+		str := resp.Header["Location"][0]
+
+		c.debug("Got 302 to %s", str)
+
+		req, err = http.NewRequest("GET", str, nil)
+		if err != nil {
+			return []byte{}, errors.Wrap(err, "Cannot handle redirect")
+		}
+
+		resp, err = c.client.Do(req)
+		if err != nil {
+			return []byte{}, errors.Wrap(err, "client.Do failed")
+		}
+		c.verbose("resp was %v", resp)
+	} else {
+		return body, errors.Wrapf(err, "bad status code: %v body: %q", resp.Status, body)
+	}
+
+	var report Analyze
+
+	err = json.Unmarshal(body, &report)
+
+	// Give some time to performe the test
+	if report.State == "PENDING" {
+		time.Sleep(2 * time.Second)
+		err = nil
+	}
+
+	return body, err
+}
+
+// Mon Jan 2 15:04:05 MST 2006
+
+func (c *Client) newEnough(endTime string) bool {
+	t1, err := time.Parse("Mon, 2 Jan 2006 15:04:05 MST", endTime)
+	if err == nil {
+		if time.Since(t1) < c.cache {
+			return true
+		}
+	}
+	return false
+}
