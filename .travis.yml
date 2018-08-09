@@ -1,0 +1,21 @@
+language: go
+go:
+- "1.10.x"
+- master
+matrix:
+  allow_failures:
+    - go: master
+  fast_finish: true
+branches:
+  only:
+  - develop
+  - master
+install:
+- go get github.com/stretchr/testify/assert
+- go get github.com/stretchr/testify/require
+- go get github.com/goware/httpmock
+- go get github.com/keltia/proxy
+script:
+  - make
+  - make test
+  - make windows
