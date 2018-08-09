@@ -142,3 +142,8 @@ func (c *Client) GetScanReport(site string) (ScanReport, error) {
 	return sc, errors.Wrap(err, "ScanReport unmarshall failed")
 
 }
+
+// Version returns guess what?
+func Version() string {
+	return APIVersion
+}
