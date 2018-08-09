@@ -67,10 +67,8 @@ func NewClient(cnf ...Config) (*Client, error) {
 		c.debug("got cnf: %#v", cnf[0])
 	}
 
-	proxyauth, err := proxy.SetupProxyAuth()
-	if err != nil {
-		return nil, errors.Wrap(err, "proxy.SetupProxyAuth")
-	}
+	// We do not care whether it fails or not, if it does, just no proxyauth.
+	proxyauth, _ := proxy.SetupProxyAuth()
 
 	// Save it
 	c.proxyauth = proxyauth
