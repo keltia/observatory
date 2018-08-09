@@ -29,7 +29,7 @@ const (
 )
 
 var (
-	APIVersion string
+	APIVersion = MyVersion
 )
 
 // Public functions
