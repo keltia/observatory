@@ -54,7 +54,7 @@ func main() {
 	} else {
 		fmt.Printf("%s Wrapper: %s API version %s\n\n",
 			MyName, observatory.MyVersion, observatory.APIVersion)
-		grade, err := c.GetScore(site)
+		grade, err := c.GetGrade(site)
 		if err != nil {
 			log.Fatalf("impossible to get grade for '%s'\n", site)
 		}
