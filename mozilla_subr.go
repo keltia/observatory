@@ -21,12 +21,11 @@ func myRedirect(req *http.Request, via []*http.Request) error {
 
 // AddQueryParameters adds query parameters to the URL.
 func AddQueryParameters(baseURL string, queryParams map[string]string) string {
-	baseURL += "?"
 	params := url.Values{}
 	for key, value := range queryParams {
 		params.Add(key, value)
 	}
-	return baseURL + params.Encode()
+	return fmt.Sprintf("%s&%s", baseURL, params.Encode())
 }
 
 // prepareRequest insert all pre-defined stuff
