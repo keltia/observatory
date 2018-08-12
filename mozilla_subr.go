@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 
@@ -32,7 +31,7 @@ func AddQueryParameters(baseURL string, queryParams map[string]string) string {
 func (c *Client) prepareRequest(method, what string, opts map[string]string) (req *http.Request) {
 	var endPoint string
 
-	// This is a hack to fetch direct urls for results
+	// This allow for overriding baseurl for tests
 	if c.baseurl != "" {
 		endPoint = fmt.Sprintf("%s/%s/", c.baseurl, what)
 	} else {
@@ -53,19 +52,21 @@ func (c *Client) prepareRequest(method, what string, opts map[string]string) (re
 	return
 }
 
-func (c *Client) callAPI(site, word, cmd, sbody string) ([]byte, error) {
+func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byte, error) {
 
-	str := fmt.Sprintf("%s/%s?host=%s", c.baseurl, cmd, site)
+	/*str := fmt.Sprintf("%s/%s?host=%s", c.baseurl, cmd, site)
 
 	c.debug("str=%s", str)
 	req, err := http.NewRequest(word, str, nil)
-	if err != nil {
-		log.Printf("error: req is nil: %v", err)
-		return []byte{}, errors.Wrap(err, "req is nil")
+	*/
+	req := c.prepareRequest(word, cmd, opts)
+	if req == nil {
+		return []byte{}, errors.New("req is nil")
 	}
 
 	c.debug("req=%#v", req)
 	c.debug("clt=%#v", c.client)
+	c.debug("opts=%v", opts)
 
 	// If we have a POST and a body, insert them.
 	if sbody != "" && word == "POST" {

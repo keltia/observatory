@@ -90,11 +90,15 @@ func (c *Client) GetScore(site string) (score int, err error) {
 
 	// Check whether we have a cached value inside our caching timeout
 
-	_, err = c.callAPI(site, "POST", "analyze", "hidden=true&rescan=true")
+	opts := map[string]string{
+		"host": site,
+	}
+
+	_, err = c.callAPI("POST", "analyze", "hidden=true&rescan=true", opts)
 	if err != nil {
 		return -1, errors.Wrap(err, "callAPI failed")
 	}
-	r, err := c.callAPI(site, "GET", "analyze", "")
+	r, err := c.callAPI("GET", "analyze", "", opts)
 
 	var ar Analyze
 
@@ -105,11 +109,19 @@ func (c *Client) GetScore(site string) (score int, err error) {
 // GetGrade returns the letter equivalent to the score
 func (c *Client) GetGrade(site string) (grade string, err error) {
 	c.debug("GetGrade")
-	_, err = c.callAPI(site, "POST", "analyze", "hidden=true&rescan=true")
+
+	opts := map[string]string{
+		"host": site,
+	}
+
+	_, err = c.callAPI("POST", "analyze", "hidden=true&rescan=true", opts)
 	if err != nil {
 		return "Z", errors.Wrap(err, "callAPI failed")
 	}
-	r, err := c.callAPI(site, "GET", "analyze", "")
+	r, err := c.callAPI("GET", "analyze", "", opts)
+	if err != nil {
+		return "Z", errors.Wrap(err, "callAPI failed")
+	}
 
 	var ar Analyze
 
@@ -118,29 +130,19 @@ func (c *Client) GetGrade(site string) (grade string, err error) {
 }
 
 // GetDetailedReport returns the full scan report
-func (c *Client) GetScanReport(site string) (ScanReport, error) {
+func (c *Client) GetScanReport(scanID string) (ScanReport, error) {
 	c.debug("GetScanReport")
-	_, err := c.callAPI(site, "POST", "getScanResults", "hidden=true&rescan=true")
-	if err != nil {
-		return ScanReport{}, errors.Wrap(err, "callAPI failed")
+
+	opts := map[string]string{
+		"scan": scanID,
 	}
 
-	r, err := c.callAPI(site, "GET", "getScanResults", "")
-	if err != nil {
-		return ScanReport{}, errors.Wrap(err, "GetScanReport")
-	}
-
-	var ar Analyze
-
-	err = json.Unmarshal(r, &ar)
-
-	s, err := c.callAPI(site, "GET", "getScanResults", "")
+	s, err := c.callAPI("GET", "getScanResults", "", opts)
 
 	var sc ScanReport
 
 	err = json.Unmarshal(s, &sc)
 	return sc, errors.Wrap(err, "ScanReport unmarshall failed")
-
 }
 
 // Version returns guess what?
