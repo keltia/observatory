@@ -9,7 +9,7 @@ GOBIN=	${GOPATH}/bin
 
 GO=		go
 GSRCS=	cmd/getgrade/main.go
-SRCS=	mozilla.go types.go utils.go
+SRCS=	mozilla.go mozilla_subr.go types.go utils.go
 
 BIN=	getgrade
 EXE=	${BIN}.exe
