@@ -59,3 +59,12 @@ type Scan struct {
 	ScoreDescription string `json:"score_description"`
 	ScoreModifier    int    `json:"score_modifier"`
 }
+
+// HostHistory for a given site
+type HostHistory struct {
+	EndTime              string `json:"end_time"`
+	EndTimeUnixTimestamp int64  `json:"end_time_unix_timestamp"`
+	Grade                string
+	ScanID               int `json:"scan_id"`
+	Score                int
+}
