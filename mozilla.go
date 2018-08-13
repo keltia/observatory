@@ -23,7 +23,7 @@ const (
 	DefaultCache = 5 * time.Minute
 
 	// MyVersion is the API version
-	MyVersion = "0.3.0"
+	MyVersion = "0.9.0"
 
 	// MyName is the name used for the configuration
 	MyName = "observatory"
