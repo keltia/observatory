@@ -8,7 +8,6 @@ This is just a very short example.
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -79,8 +78,7 @@ func main() {
 		}
 
 		// Just dump the json
-		jr, err := json.Marshal(report)
-		fmt.Printf("%s\n", jr)
+		fmt.Printf("%s\n", report)
 	} else {
 		fmt.Printf("%s Wrapper: %s API version %s\n\n",
 			MyName, MyVersion, observatory.Version())
