@@ -63,11 +63,6 @@ func (c *Client) prepareRequest(method, what string, opts map[string]string) (re
 
 func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byte, error) {
 
-	/*str := fmt.Sprintf("%s/%s?host=%s", c.baseurl, cmd, site)
-
-	c.debug("str=%s", str)
-	req, err := http.NewRequest(word, str, nil)
-	*/
 	req := c.prepareRequest(word, cmd, opts)
 	if req == nil {
 		return []byte{}, errors.New("req is nil")
