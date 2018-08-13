@@ -33,9 +33,9 @@ func (c *Client) prepareRequest(method, what string, opts map[string]string) (re
 
 	// This allow for overriding baseurl for tests
 	if c.baseurl != "" {
-		endPoint = fmt.Sprintf("%s/%s/", c.baseurl, what)
+		endPoint = fmt.Sprintf("%s/%s", c.baseurl, what)
 	} else {
-		endPoint = fmt.Sprintf("%s/%s/", baseURL, what)
+		endPoint = fmt.Sprintf("%s/%s", baseURL, what)
 	}
 
 	c.verbose("Options:\n%v", opts)
