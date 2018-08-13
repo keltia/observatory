@@ -131,16 +131,6 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 		return body, errors.Wrapf(err, "bad status code: %v body: %q", resp.Status, body)
 	}
 
-	var report Analyze
-
-	err = json.Unmarshal(body, &report)
-
-	// Give some time to performe the test
-	if report.State == "PENDING" {
-		time.Sleep(2 * time.Second)
-		err = nil
-	}
-
 	return body, err
 }
 
