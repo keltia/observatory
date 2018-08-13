@@ -24,7 +24,7 @@ func AddQueryParameters(baseURL string, queryParams map[string]string) string {
 	for key, value := range queryParams {
 		params.Add(key, value)
 	}
-	return fmt.Sprintf("%s&%s", baseURL, params.Encode())
+	return fmt.Sprintf("%s?%s", baseURL, params.Encode())
 }
 
 // prepareRequest insert all pre-defined stuff
