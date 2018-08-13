@@ -82,7 +82,6 @@ OPTIONS
 | Timeout | int  | time for connections (default: 10s) |
 | Log     | int  | 1: verbose, 2: debug (default: 0) |
 | Refresh | bool | Force refresh of the sites (default: false) |
-| Cache   | int  | time allowed for caching last call (default 300s) |
 
 
 ## Using behind a web Proxy
