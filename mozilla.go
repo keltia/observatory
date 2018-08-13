@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"fmt"
 	"github.com/keltia/proxy"
 	"github.com/pkg/errors"
 )
@@ -130,14 +131,14 @@ func (c *Client) GetGrade(site string) (grade string, err error) {
 }
 
 // GetDetailedReport returns the full scan report
-func (c *Client) GetScanReport(scanID string) (ScanReport, error) {
+func (c *Client) GetScanReport(scanID int) (ScanReport, error) {
 	c.debug("GetScanReport")
 
 	opts := map[string]string{
-		"scan": scanID,
+		"scan": fmt.Sprintf("%d", scanID),
 	}
 
-	s, err := c.callAPI("GET", "getScanResults", "", opts)
+	s, err := c.callAPI("GET", "getScanResults", "hidden=true", opts)
 
 	var sc ScanReport
 
