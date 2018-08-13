@@ -29,8 +29,8 @@ var (
 
 func init() {
 	flag.BoolVar(&fDetailed, "d", false, "Get a detailed report")
-	flag.BoolVar(&fDebug, "v", false, "Verbose mode")
-	flag.BoolVar(&fVerbose, "D", false, "Debug mode")
+	flag.BoolVar(&fVerbose, "v", false, "Verbose mode")
+	flag.BoolVar(&fDebug, "D", false, "Debug mode")
 	flag.Parse()
 
 	if len(flag.Args()) == 0 {
