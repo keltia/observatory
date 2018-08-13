@@ -14,6 +14,12 @@ import (
 
 // Private area
 
+func toDuration(t int) time.Duration {
+	s := fmt.Sprintf("%ds", t)
+	d, _ := time.ParseDuration(s)
+	return d
+}
+
 func myRedirect(req *http.Request, via []*http.Request) error {
 	return nil
 }
