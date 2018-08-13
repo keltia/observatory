@@ -111,22 +111,7 @@ func (c *Client) GetScore(site string) (score int, err error) {
 func (c *Client) GetGrade(site string) (grade string, err error) {
 	c.debug("GetGrade")
 
-	opts := map[string]string{
-		"host": site,
-	}
-
-	_, err = c.callAPI("POST", "analyze", "hidden=true&rescan=true", opts)
-	if err != nil {
-		return "Z", errors.Wrap(err, "callAPI failed")
-	}
-	r, err := c.callAPI("GET", "analyze", "", opts)
-	if err != nil {
-		return "Z", errors.Wrap(err, "callAPI failed")
-	}
-
-	var ar Analyze
-
-	err = json.Unmarshal(r, &ar)
+	ar, err := c.getAnalyze(site, true)
 	return ar.Grade, errors.Wrap(err, "GetGrade failed")
 }
 
@@ -134,15 +119,7 @@ func (c *Client) GetGrade(site string) (grade string, err error) {
 func (c *Client) GetScanID(site string) (int, error) {
 	c.debug("GetScanID")
 
-	opts := map[string]string{
-		"host": site,
-	}
-
-	r, err := c.callAPI("GET", "analyze", "hidden=true", opts)
-
-	var ar Analyze
-
-	err = json.Unmarshal(r, &ar)
+	ar, err := c.getAnalyze(site, false)
 	return ar.ScanID, errors.Wrap(err, "GetScanID failed")
 }
 
