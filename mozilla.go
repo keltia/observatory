@@ -49,8 +49,8 @@ func NewClient(cnf ...Config) (*Client, error) {
 		c = &Client{
 			baseurl: cnf[0].BaseURL,
 			level:   cnf[0].Log,
-			refresh: cnf[0].Refresh,
-			cache:   cnf[0].Cache * time.Second,
+			cache:   toDuration(cnf[0].Cache) * time.Second,
+			timeout: toDuration(cnf[0].Timeout) * time.Second,
 		}
 
 		if cnf[0].Timeout == 0 {
