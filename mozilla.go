@@ -154,7 +154,7 @@ func (c *Client) GetScanReport(scanID int) (ScanReport, error) {
 		"scan": fmt.Sprintf("%d", scanID),
 	}
 
-	s, err := c.callAPI("GET", "getScanResults", "hidden=true", opts)
+	s, err := c.callAPI("GET", "getScanResults", "", opts)
 
 	var sc ScanReport
 
