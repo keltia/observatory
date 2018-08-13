@@ -144,6 +144,25 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 	return body, err
 }
 
+// getAnalyze is an helper func for the API
+func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
+	opts := map[string]string{
+		"host": site,
+	}
+
+	body := "hidden=true"
+	if force {
+		body = body + "&rescan=true"
+	}
+
+	r, err := c.callAPI("GET", "analyze", body, opts)
+
+	var ar Analyze
+
+	err = json.Unmarshal(r, &ar)
+	return &ar, errors.Wrap(err, "getAnalyze")
+}
+
 // Mon Jan 2 15:04:05 MST 2006
 
 func (c *Client) newEnough(endTime string) bool {
