@@ -87,7 +87,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		c.verbose("err=%#v", err)
+		c.debug("err=%#v", err)
 		return []byte{}, errors.Wrap(err, "1st call failed")
 	}
 	c.debug("resp=%#v", resp)
@@ -110,7 +110,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 			if err != nil {
 				return body, errors.Wrap(err, "pending failed")
 			}
-			c.verbose("resp was %v", resp)
+			c.debug("resp was %v", resp)
 		}
 	} else if resp.StatusCode == http.StatusFound {
 		str := resp.Header["Location"][0]
@@ -126,7 +126,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 		if err != nil {
 			return []byte{}, errors.Wrap(err, "client.Do failed")
 		}
-		c.verbose("resp was %v", resp)
+		c.debug("resp was %v", resp)
 	} else {
 		return body, errors.Wrapf(err, "bad status code: %v body: %q", resp.Status, body)
 	}
