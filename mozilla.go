@@ -130,6 +130,22 @@ func (c *Client) GetGrade(site string) (grade string, err error) {
 	return ar.Grade, errors.Wrap(err, "GetGrade failed")
 }
 
+// GetScanID returns the scan ID for the most recent run
+func (c *Client) GetScanID(site string) (int, error) {
+	c.debug("GetScanID")
+
+	opts := map[string]string{
+		"host": site,
+	}
+
+	r, err := c.callAPI("GET", "analyze", "hidden=true", opts)
+
+	var ar Analyze
+
+	err = json.Unmarshal(r, &ar)
+	return ar.ScanID, errors.Wrap(err, "GetScanID failed")
+}
+
 // GetDetailedReport returns the full scan report
 func (c *Client) GetScanReport(scanID int) (ScanReport, error) {
 	c.debug("GetScanReport")
