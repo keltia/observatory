@@ -154,15 +154,3 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 	err = json.Unmarshal(r, &ar)
 	return &ar, errors.Wrap(err, "getAnalyze")
 }
-
-// Mon Jan 2 15:04:05 MST 2006
-
-func (c *Client) newEnough(endTime string) bool {
-	t1, err := time.Parse("Mon, 2 Jan 2006 15:04:05 MST", endTime)
-	if err == nil {
-		if time.Since(t1) < c.cache {
-			return true
-		}
-	}
-	return false
-}
