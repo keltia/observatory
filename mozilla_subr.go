@@ -117,7 +117,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 
 		c.debug("Got 302 to %s", str)
 
-		req, err = http.NewRequest("GET", str, nil)
+		req := c.prepareRequest(word, cmd, opts)
 		if err != nil {
 			return []byte{}, errors.Wrap(err, "Cannot handle redirect")
 		}
