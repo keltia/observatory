@@ -12,7 +12,6 @@ type Client struct {
 	level     int
 	client    *http.Client
 	timeout   time.Duration
-	cache     time.Duration
 
 	// Local cache for 5mn of last query
 	last Analyze
@@ -23,7 +22,6 @@ type Config struct {
 	BaseURL string
 	Timeout int
 	Log     int
-	Cache   int
 }
 
 // Analyze is for one run
