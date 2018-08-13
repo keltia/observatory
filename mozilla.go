@@ -123,6 +123,25 @@ func (c *Client) GetScanReport(scanID int) ([]byte, error) {
 	return s, errors.Wrap(err, "GetScanReport failed")
 }
 
+// GetHostHistory returns the list of recent scans
+func (c *Client) GetHostHistory(site string) ([]HostHistory, error) {
+	c.debug("GetSiteHistory")
+
+	opts := map[string]string{
+		"scan": site,
+	}
+
+	s, err := c.callAPI("GET", "getHostHistory", "", opts)
+	if err != nil {
+		return []HostHistory{}, errors.Wrap(err, "GetHostHistory failed")
+	}
+
+	var hs []HostHistory
+
+	err = json.Unmarshal(s, &hs)
+	return hs, errors.Wrap(err, "GetHostHistory failed")
+}
+
 // Version returns guess what?
 func Version() string {
 	return APIVersion
