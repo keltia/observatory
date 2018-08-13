@@ -120,7 +120,7 @@ func (c *Client) GetScanReport(scanID int) ([]byte, error) {
 	s, err := c.callAPI("GET", "getScanResults", "", opts)
 
 	// Return raw json
-	return s, errors.Wrap(err, "GetScanReport")
+	return s, errors.Wrap(err, "GetScanReport failed")
 }
 
 // Version returns guess what?
