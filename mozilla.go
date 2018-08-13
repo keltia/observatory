@@ -89,21 +89,7 @@ func NewClient(cnf ...Config) (*Client, error) {
 func (c *Client) GetScore(site string) (score int, err error) {
 	c.debug("GetScore")
 
-	// Check whether we have a cached value inside our caching timeout
-
-	opts := map[string]string{
-		"host": site,
-	}
-
-	_, err = c.callAPI("POST", "analyze", "hidden=true&rescan=true", opts)
-	if err != nil {
-		return -1, errors.Wrap(err, "callAPI failed")
-	}
-	r, err := c.callAPI("GET", "analyze", "", opts)
-
-	var ar Analyze
-
-	err = json.Unmarshal(r, &ar)
+	ar, err := c.getAnalyze(site, true)
 	return ar.Score, errors.Wrap(err, "GetScore failed")
 }
 
