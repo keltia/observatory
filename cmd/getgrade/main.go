@@ -59,7 +59,16 @@ func main() {
 	}
 
 	if fDetailed {
-		report, err := c.GetScanReport(site)
+		scanid, err := c.GetScanID(site)
+		if err != nil {
+			log.Fatalf("impossible to get scanid: %v", err)
+		}
+
+		if scanid == 0 {
+			log.Fatalf("invalid scanid: %d: %v", scanid, err)
+		}
+
+		report, err := c.GetScanReport(scanid)
 		if err != nil {
 			log.Fatalf("impossible to get grade for '%s'\n", site)
 		}
