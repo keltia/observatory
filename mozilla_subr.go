@@ -147,6 +147,9 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 	}
 
 	r, err := c.callAPI("GET", "analyze", "", opts)
+	if err != nil {
+		return &ar, errors.Wrap(err, "getAnalyze")
+	}
 
 	err = json.Unmarshal(r, &ar)
 	return &ar, errors.Wrap(err, "getAnalyze")
