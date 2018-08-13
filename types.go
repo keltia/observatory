@@ -59,8 +59,3 @@ type Scan struct {
 	ScoreDescription string `json:"score_description"`
 	ScoreModifier    int    `json:"score_modifier"`
 }
-
-// ScanReport is all results from tests
-type ScanReport struct {
-	Tests map[string]Scan
-}
