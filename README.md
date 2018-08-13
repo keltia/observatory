@@ -43,7 +43,6 @@ As with many API wrappers, you will need to first create a client with some opti
     cnf := observatory.Config{
         Timeout:15,
         Log:2,
-        Cache: 10,
     }
     c, err := observatory.NewClient(cnf)
     report, err := c.GetScore("example.com")
