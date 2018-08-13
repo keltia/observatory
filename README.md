@@ -46,10 +46,22 @@ As with many API wrappers, you will need to first create a client with some opti
         Cache: 10,
     }
     c, err := observatory.NewClient(cnf)
-    report, err := c.GetScanReport("foo.xxx")
+    report, err := c.GetScore("example.com")
     if err != nil {
         log.Fatalf("error: %v", err)
     }
+```
+
+For the `GetDetailedReport()` call, the raw JSON object will be returned (and presumably handled by `jq`).
+
+``` go
+    // Simplest way
+    c, _ := observatory.NewClient()
+    report, err := c.GetDetailedReport("example.com")
+    if err != nil {
+        log.Fatalf("error: %v", err)
+    }
+    fmt.Printf("Full report:\n%v\n", report)
 ```
 
 OPTIONS
