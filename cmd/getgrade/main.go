@@ -11,14 +11,17 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/keltia/observatory"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/keltia/observatory"
 )
 
 var (
+	fDebug    bool
 	fDetailed bool
+	fVerbose  bool
 
 	// MyName is the application name
 	MyName = filepath.Base(os.Args[0])
@@ -26,6 +29,8 @@ var (
 
 func init() {
 	flag.BoolVar(&fDetailed, "d", false, "Get a detailed report")
+	flag.BoolVar(&fDebug, "v", false, "Verbose mode")
+	flag.BoolVar(&fVerbose, "D", false, "Debug mode")
 	flag.Parse()
 
 	if len(flag.Args()) == 0 {
@@ -34,10 +39,21 @@ func init() {
 }
 
 func main() {
+	var level = 0
+
 	site := flag.Arg(0)
 
+	if fVerbose {
+		level = 1
+	}
+
+	if fDebug {
+		level = 2
+		fVerbose = true
+	}
+
 	// Setup client
-	c, err := observatory.NewClient()
+	c, err := observatory.NewClient(observatory.Config{Log: level})
 	if err != nil {
 		log.Fatalf("error setting up client: %v", err)
 	}
@@ -56,7 +72,7 @@ func main() {
 			MyName, observatory.Version(), observatory.Version())
 		grade, err := c.GetGrade(site)
 		if err != nil {
-			log.Fatalf("impossible to get grade for '%s'\n", site)
+			log.Fatalf("impossible to get grade for '%s': %v\n", site, err)
 		}
 		fmt.Printf("Grade for '%s' is %s\n", site, grade)
 	}
