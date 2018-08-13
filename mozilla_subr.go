@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/pkg/errors"
-	"net/url"
 )
 
 // Private area
@@ -40,8 +40,11 @@ func (c *Client) prepareRequest(method, what string, opts map[string]string) (re
 
 	c.verbose("Options:\n%v", opts)
 	baseURL := AddQueryParameters(endPoint, opts)
+	c.debug("baseURL: %s", baseURL)
 
 	req, _ = http.NewRequest(method, baseURL, nil)
+
+	c.debug("req=%#v", req)
 
 	// We need these when we POST
 	if method == "POST" {
@@ -88,6 +91,8 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 	if err != nil {
 		return []byte{}, errors.Wrap(err, "can not read body")
 	}
+
+	c.debug("body=%v", string(body))
 
 	if resp.StatusCode == http.StatusOK {
 
