@@ -5,10 +5,10 @@ Not going to implement the full scan report struct, I do not need it, juste grad
 */
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
-	"fmt"
 	"github.com/keltia/proxy"
 	"github.com/pkg/errors"
 )
