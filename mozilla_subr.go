@@ -131,6 +131,8 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 
 // getAnalyze is an helper func for the API
 func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
+	var ar Analyze
+
 	opts := map[string]string{
 		"host": site,
 	}
@@ -138,11 +140,13 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 	body := "hidden=true"
 	if force {
 		body = body + "&rescan=true"
+		ret, err := c.callAPI("POST", "analyze", body, opts)
+		if err != nil {
+			return nil, errors.Wrapf(err, "getAnalyze - ret: %v", ret)
+		}
 	}
 
-	r, err := c.callAPI("GET", "analyze", body, opts)
-
-	var ar Analyze
+	r, err := c.callAPI("GET", "analyze", "", opts)
 
 	err = json.Unmarshal(r, &ar)
 	return &ar, errors.Wrap(err, "getAnalyze")
