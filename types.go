@@ -26,7 +26,7 @@ type Config struct {
 	Cache   int
 }
 
-// Analyse is one run
+// Analyze is for one run
 type Analyze struct {
 	AlgorithmVersion int `json:"algorithm_version"`
 

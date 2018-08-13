@@ -105,7 +105,7 @@ func (c *Client) GetScanID(site string) (int, error) {
 	return ar.ScanID, errors.Wrap(err, "GetScanID failed")
 }
 
-// GetDetailedReport returns the full scan report
+// GetScanReport returns the full scan report
 func (c *Client) GetScanReport(scanID int) ([]byte, error) {
 	c.debug("GetScanReport")
 
