@@ -18,6 +18,11 @@ import (
 	"github.com/keltia/observatory"
 )
 
+const (
+	// MyVersion is for the app
+	MyVersion = "0.1.0"
+)
+
 var (
 	fDebug    bool
 	fDetailed bool
@@ -78,7 +83,7 @@ func main() {
 		fmt.Printf("%s\n", jr)
 	} else {
 		fmt.Printf("%s Wrapper: %s API version %s\n\n",
-			MyName, observatory.Version(), observatory.Version())
+			MyName, MyVersion, observatory.Version())
 		grade, err := c.GetGrade(site)
 		if err != nil {
 			log.Fatalf("impossible to get grade for '%s': %v\n", site, err)
