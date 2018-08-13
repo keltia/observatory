@@ -40,7 +40,7 @@ type Analyze struct {
 	State               string `json:"state"`
 	StatusCode          int    `json:"status_code"`
 	Hidden              bool   `json:"hidden"`
-	LikelyhoodIndicator string `json:"likelyhood_indicator"`
+	LikelihoodIndicator string `json:"likelihood_indicator"`
 
 	TestsFailed   int `json:"tests_failed"`
 	TestsPassed   int `json:"tests_passed"`
