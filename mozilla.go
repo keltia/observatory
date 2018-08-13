@@ -19,9 +19,6 @@ const (
 	// DefaultWait is the timeout
 	DefaultWait = 10 * time.Second
 
-	// DefaultCache is in second
-	DefaultCache = 5 * time.Minute
-
 	// MyVersion is the API version
 	MyVersion = "0.9.0"
 
@@ -40,13 +37,11 @@ func NewClient(cnf ...Config) (*Client, error) {
 		c = &Client{
 			baseurl: baseURL,
 			timeout: DefaultWait,
-			cache:   DefaultCache,
 		}
 	} else {
 		c = &Client{
 			baseurl: cnf[0].BaseURL,
 			level:   cnf[0].Log,
-			cache:   toDuration(cnf[0].Cache) * time.Second,
 			timeout: toDuration(cnf[0].Timeout) * time.Second,
 		}
 
