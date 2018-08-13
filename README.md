@@ -120,6 +120,10 @@ The [BSD 2-Clause license](https://github.com/keltia/observatory/LICENSE.md).
 
 This project is an open Open Source project, please read `CONTRIBUTING.md`.
 
+# References
+
+[Mozilla Observatory documentation](https://github.com/mozilla/http-observatory/blob/master/httpobs/docs/api.md#host-history)
+
 # Feedback
 
 We welcome pull requests, bug fixes and issue reports.
