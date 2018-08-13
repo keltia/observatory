@@ -29,10 +29,6 @@ const (
 	MyName = "observatory"
 )
 
-var (
-	APIVersion = MyVersion
-)
-
 // Public functions
 
 // NewClient setups proxy authentication
@@ -144,5 +140,5 @@ func (c *Client) GetHostHistory(site string) ([]HostHistory, error) {
 
 // Version returns guess what?
 func Version() string {
-	return APIVersion
+	return MyVersion
 }
