@@ -124,7 +124,7 @@ func (c *Client) GetScanID(site string) (int, error) {
 }
 
 // GetDetailedReport returns the full scan report
-func (c *Client) GetScanReport(scanID int) (ScanReport, error) {
+func (c *Client) GetScanReport(scanID int) ([]byte, error) {
 	c.debug("GetScanReport")
 
 	opts := map[string]string{
@@ -133,10 +133,8 @@ func (c *Client) GetScanReport(scanID int) (ScanReport, error) {
 
 	s, err := c.callAPI("GET", "getScanResults", "", opts)
 
-	var sc ScanReport
-
-	err = json.Unmarshal(s, &sc)
-	return sc, errors.Wrap(err, "ScanReport unmarshall failed")
+	// Return raw json
+	return s, errors.Wrap(err, "GetScanReport")
 }
 
 // Version returns guess what?
