@@ -64,6 +64,18 @@ For the `GetDetailedReport()` call, the raw JSON object will be returned (and pr
     fmt.Printf("Full report:\n%v\n", report)
 ```
 
+The `GetHostHistory()` returns the list of recent scans for the given site:
+
+``` go
+    // Simplest way
+    c, _ := observatory.NewClient()
+    
+    scans, err := c.GetHostHistory("example.com")
+    for _, s := range scans {
+        ...
+    }
+```
+
 OPTIONS
 
 | Option  | Type | Description |
