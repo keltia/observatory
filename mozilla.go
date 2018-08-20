@@ -20,7 +20,7 @@ const (
 	DefaultWait = 10 * time.Second
 
 	// MyVersion is the API version
-	MyVersion = "1.0.0"
+	MyVersion = "1.0.1"
 
 	// MyName is the name used for the configuration
 	MyName = "observatory"
