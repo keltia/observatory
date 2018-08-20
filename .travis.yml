@@ -17,6 +17,6 @@ install:
 - go get github.com/keltia/proxy
 - go get github.com/pkg/errors
 script:
-  - make
-  - make test
-  - make windows
+  - env GO111MODULE=on make
+  - env GO111MODULE=on make test
+  - env GO111MODULE=on make windows

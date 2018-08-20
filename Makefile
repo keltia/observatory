@@ -4,14 +4,14 @@
 # Copyright 2018 © by Ollivier Robert <roberto@keltia.net>
 #
 
-.PATH=	cmd/getgrade:.
+.PATH=	cmd/observatory:.
 GOBIN=	${GOPATH}/bin
 
 GO=		go
-GSRCS=	cmd/getgrade/main.go
+GSRCS=	cmd/observatory/main.go
 SRCS=	mozilla.go mozilla_subr.go types.go utils.go
 
-BIN=	getgrade
+BIN=	observatory
 EXE=	${BIN}.exe
 
 OPTS=	-ldflags="-s -w" -v
