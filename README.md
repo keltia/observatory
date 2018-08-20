@@ -20,11 +20,11 @@ Go wrapper for [Mozilla Observatory](https://observatory.mozilla.org/) API.
 
 ## USAGE
 
-There is a small example program included in `cmd/getgrade` to either show the grade of a given site or JSON dump of the detailed report.
+There is a small example program included in `cmd/observatory` to either show the grade of a given site or JSON dump of the detailed report.
 
-You can use [`jq`](https://stedolan.github.io/jq/) to display the output of `getgrade -d <site>` in a colorised way:
+You can use [`jq`](https://stedolan.github.io/jq/) to display the output of `observatory -d <site>` in a colorised way:
 
-    getgrade -d observatory.mozilla.org | jq .
+    observatory -d observatory.mozilla.org | jq .
 
 ## API Usage
 
