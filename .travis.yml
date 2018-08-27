@@ -6,11 +6,13 @@ matrix:
   allow_failures:
     - go: master
   fast_finish: true
+env:
+  - GO111MODULE=on
 branches:
   only:
   - develop
   - master
 script:
-  - env GO111MODULE=on make
-  - env GO111MODULE=on make test
-  - env GO111MODULE=on make windows
+  - make
+  - make test
+  - make windows
