@@ -1,4 +1,10 @@
+github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/keltia/proxy v0.9.2 h1:C+blw6v9ENOVPWoMxceqjoPq3PPQbVvIVEn5IqhsrQ4=
 github.com/keltia/proxy v0.9.2/go.mod h1:nOa+W/1aVASsgmftatmV095z6kbIPLrB8/xWwF2deGI=
+github.com/keltia/proxy v0.9.3 h1:Cpv6VA50SXSY+JxQ6q+BHpPMNAfWGZU4Qb5kdwUR1TY=
+github.com/keltia/proxy v0.9.3/go.mod h1:fLU4DmBPG0oh0md9fWggE2oG2m7Lchv3eim+GiO3pZY=
 github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
