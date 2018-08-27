@@ -1,6 +1,6 @@
 language: go
 go:
-- "1.10.x"
+- "1.11.x"
 - master
 matrix:
   allow_failures:
@@ -10,12 +10,6 @@ branches:
   only:
   - develop
   - master
-install:
-- go get github.com/stretchr/testify/assert
-- go get github.com/stretchr/testify/require
-- go get github.com/goware/httpmock
-- go get github.com/keltia/proxy
-- go get github.com/pkg/errors
 script:
   - env GO111MODULE=on make
   - env GO111MODULE=on make test
