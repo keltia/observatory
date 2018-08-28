@@ -42,6 +42,7 @@ As with many API wrappers, you will need to first create a client with some opti
     // With some options, timeout at 15s, caching for 10s and debug-like verbosity
     cnf := observatory.Config{
         Timeout:15,
+        Retries:3,
         Log:2,
     }
     c, err := observatory.NewClient(cnf)
@@ -81,6 +82,7 @@ OPTIONS
 | ------- | ---- | ----------- |
 | Timeout | int  | time for connections (default: 10s) |
 | Log     | int  | 1: verbose, 2: debug (default: 0) |
+| Retries | int  | Number of retries when not FINISHED (default: 5) |
 | Refresh | bool | Force refresh of the sites (default: false) |
 
 
