@@ -38,12 +38,7 @@ func AddQueryParameters(baseURL string, queryParams map[string]string) string {
 func (c *Client) prepareRequest(method, what string, opts map[string]string) (req *http.Request) {
 	var endPoint string
 
-	// This allow for overriding baseurl for tests
-	if c.baseurl != "" {
-		endPoint = fmt.Sprintf("%s/%s", c.baseurl, what)
-	} else {
-		endPoint = fmt.Sprintf("%s/%s", baseURL, what)
-	}
+	endPoint = fmt.Sprintf("%s/%s", c.baseurl, what)
 
 	c.verbose("Options:\n%v", opts)
 	baseURL := AddQueryParameters(endPoint, opts)
