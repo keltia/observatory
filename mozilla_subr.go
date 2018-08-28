@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -107,7 +108,8 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 
 			c.debug("status OK")
 
-			if string(body) == "pending" {
+			// We wait for FINISHED state
+			if !strings.Contains(string(body), "FINISHED") {
 				time.Sleep(2 * time.Second)
 				retry++
 				resp, err = c.client.Do(req)
