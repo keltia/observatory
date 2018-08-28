@@ -19,8 +19,11 @@ const (
 	// DefaultWait is the timeout
 	DefaultWait = 10 * time.Second
 
+	// DefaultRetry is the number of retries we allow
+	DefaultRetry = 5
+
 	// MyVersion is the API version
-	MyVersion = "1.0.1"
+	MyVersion = "1.1.0"
 
 	// MyName is the name used for the configuration
 	MyName = "observatory"
@@ -37,11 +40,13 @@ func NewClient(cnf ...Config) (*Client, error) {
 		c = &Client{
 			baseurl: baseURL,
 			timeout: DefaultWait,
+			retries: DefaultRetry,
 		}
 	} else {
 		c = &Client{
 			baseurl: cnf[0].BaseURL,
 			level:   cnf[0].Log,
+			retries: cnf[0].Retries,
 			timeout: toDuration(cnf[0].Timeout) * time.Second,
 		}
 
@@ -51,6 +56,10 @@ func NewClient(cnf ...Config) (*Client, error) {
 			c.timeout = time.Duration(cnf[0].Timeout) * time.Second
 		}
 
+		// Ensure proper default
+		if c.retries == 0 {
+			c.retries = DefaultRetry
+		}
 		// Ensure we have the API endpoint right
 		if c.baseurl == "" {
 			c.baseurl = baseURL
@@ -81,7 +90,7 @@ func (c *Client) GetScore(site string) (score int, err error) {
 	c.debug("GetScore")
 
 	ar, err := c.getAnalyze(site, true)
-	return ar.Score, errors.Wrap(err, "GetScore failed")
+	return ar.Score, errors.Wrap(err, "GetScore")
 }
 
 // GetGrade returns the letter equivalent to the score
@@ -89,7 +98,7 @@ func (c *Client) GetGrade(site string) (grade string, err error) {
 	c.debug("GetGrade")
 
 	ar, err := c.getAnalyze(site, true)
-	return ar.Grade, errors.Wrap(err, "GetGrade failed")
+	return ar.Grade, errors.Wrap(err, "GetGrade")
 }
 
 // GetScanID returns the scan ID for the most recent run
@@ -111,7 +120,7 @@ func (c *Client) GetScanReport(scanID int) ([]byte, error) {
 	s, err := c.callAPI("GET", "getScanResults", "", opts)
 
 	// Return raw json
-	return s, errors.Wrap(err, "GetScanReport failed")
+	return s, errors.Wrap(err, "GetScanReport")
 }
 
 // GetHostHistory returns the list of recent scans

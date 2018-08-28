@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -62,13 +63,16 @@ func (c *Client) prepareRequest(method, what string, opts map[string]string) (re
 }
 
 func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byte, error) {
+	var body []byte
 
+	retry := 0
+
+	c.debug("callAPI")
 	req := c.prepareRequest(word, cmd, opts)
 	if req == nil {
 		return []byte{}, errors.New("req is nil")
 	}
 
-	c.debug("req=%#v", req)
 	c.debug("clt=%#v", c.client)
 	c.debug("opts=%v", opts)
 
@@ -83,49 +87,61 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 	resp, err := c.client.Do(req)
 	if err != nil {
 		c.debug("err=%#v", err)
-		return []byte{}, errors.Wrap(err, "1st call failed")
+		return []byte{}, errors.Wrap(err, "1st call")
 	}
-	c.debug("resp=%#v", resp)
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, "can not read body")
-	}
+	c.debug("resp=%#v", resp)
 
-	c.debug("body=%v", string(body))
+	for {
+		if retry == c.retries {
+			return nil, errors.New("retries")
+		}
 
-	if resp.StatusCode == http.StatusOK {
+		c.debug("read body")
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return []byte{}, errors.Wrapf(err, "body read, retry=%d", retry)
+		}
 
-		c.debug("status OK")
+		c.debug("body=%v", string(body))
 
-		if string(body) == "pending" {
-			time.Sleep(10 * time.Second)
-			resp, err = c.client.Do(req)
+		if resp.StatusCode == http.StatusOK {
+
+			c.debug("status OK")
+
+			// We wait for FINISHED state
+			if !strings.Contains(string(body), "FINISHED") {
+				time.Sleep(2 * time.Second)
+				retry++
+				resp, err = c.client.Do(req)
+				if err != nil {
+					return body, errors.Wrapf(err, "pending, retry=%d", retry)
+				}
+				c.debug("resp was %v", resp)
+			} else {
+				return body, nil
+			}
+		} else if resp.StatusCode == http.StatusFound {
+			str := resp.Header["Location"][0]
+
+			c.debug("Got 302 to %s", str)
+
+			req := c.prepareRequest(word, cmd, opts)
 			if err != nil {
-				return body, errors.Wrap(err, "pending failed")
+				return []byte{}, errors.Wrap(err, "redirect")
+			}
+
+			resp, err = c.client.Do(req)
+			retry++
+			if err != nil {
+				return []byte{}, errors.Wrap(err, "client.Do failed")
 			}
 			c.debug("resp was %v", resp)
+		} else {
+			return body, errors.Wrapf(err, "status: %v body: %q", resp.Status, body)
 		}
-	} else if resp.StatusCode == http.StatusFound {
-		str := resp.Header["Location"][0]
-
-		c.debug("Got 302 to %s", str)
-
-		req := c.prepareRequest(word, cmd, opts)
-		if err != nil {
-			return []byte{}, errors.Wrap(err, "Cannot handle redirect")
-		}
-
-		resp, err = c.client.Do(req)
-		if err != nil {
-			return []byte{}, errors.Wrap(err, "client.Do failed")
-		}
-		c.debug("resp was %v", resp)
-	} else {
-		return body, errors.Wrapf(err, "bad status code: %v body: %q", resp.Status, body)
 	}
-
 	return body, err
 }
 
@@ -142,15 +158,15 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 		body = body + "&rescan=true"
 		ret, err := c.callAPI("POST", "analyze", body, opts)
 		if err != nil {
-			return nil, errors.Wrapf(err, "getAnalyze - ret: %v", ret)
+			return nil, errors.Wrapf(err, "getAnalyze - POST: %v", ret)
 		}
 	}
 
 	r, err := c.callAPI("GET", "analyze", "", opts)
 	if err != nil {
-		return &ar, errors.Wrap(err, "getAnalyze")
+		return &ar, errors.Wrap(err, "getAnalyze - GET")
 	}
 
 	err = json.Unmarshal(r, &ar)
-	return &ar, errors.Wrap(err, "getAnalyze")
+	return &ar, errors.Wrapf(err, "getAnalyze: %#v", r)
 }
