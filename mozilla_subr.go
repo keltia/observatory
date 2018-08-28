@@ -67,12 +67,12 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 
 	retry := 0
 
+	c.debug("callAPI")
 	req := c.prepareRequest(word, cmd, opts)
 	if req == nil {
 		return []byte{}, errors.New("req is nil")
 	}
 
-	c.debug("req=%#v", req)
 	c.debug("clt=%#v", c.client)
 	c.debug("opts=%v", opts)
 
@@ -89,18 +89,20 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 		c.debug("err=%#v", err)
 		return []byte{}, errors.Wrap(err, "1st call")
 	}
+	defer resp.Body.Close()
+
 	c.debug("resp=%#v", resp)
 
 	for {
 		if retry == c.retries {
-			return nil, errors.Wrap(err, "retries")
+			return nil, errors.New("retries")
 		}
 
+		c.debug("read body")
 		body, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return []byte{}, errors.Wrapf(err, "body read, retry=%d", retry)
 		}
-		defer resp.Body.Close()
 
 		c.debug("body=%v", string(body))
 
@@ -166,5 +168,5 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 	}
 
 	err = json.Unmarshal(r, &ar)
-	return &ar, errors.Wrap(err, "getAnalyze")
+	return &ar, errors.Wrapf(err, "getAnalyze: %#v", r)
 }
