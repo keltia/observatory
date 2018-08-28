@@ -56,6 +56,10 @@ func NewClient(cnf ...Config) (*Client, error) {
 			c.timeout = time.Duration(cnf[0].Timeout) * time.Second
 		}
 
+		// Ensure proper default
+		if c.retries == 0 {
+			c.retries = DefaultRetry
+		}
 		// Ensure we have the API endpoint right
 		if c.baseurl == "" {
 			c.baseurl = baseURL
