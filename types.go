@@ -10,6 +10,7 @@ type Client struct {
 	baseurl   string
 	proxyauth string
 	level     int
+	retries   int
 	client    *http.Client
 	timeout   time.Duration
 
@@ -21,6 +22,7 @@ type Client struct {
 type Config struct {
 	BaseURL string
 	Timeout int
+	Retries int
 	Log     int
 }
 
