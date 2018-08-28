@@ -62,6 +62,9 @@ func (c *Client) prepareRequest(method, what string, opts map[string]string) (re
 }
 
 func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byte, error) {
+	var body []byte
+
+	retry := 0
 
 	req := c.prepareRequest(word, cmd, opts)
 	if req == nil {
@@ -86,46 +89,55 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 		return []byte{}, errors.Wrap(err, "1st call failed")
 	}
 	c.debug("resp=%#v", resp)
-	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, "can not read body")
-	}
+	for {
+		if retry == c.retries {
+			return nil, errors.Wrap(err, "retries")
+		}
 
-	c.debug("body=%v", string(body))
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return []byte{}, errors.Wrap(err, "can not read body")
+		}
+		defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusOK {
+		c.debug("body=%v", string(body))
 
-		c.debug("status OK")
+		if resp.StatusCode == http.StatusOK {
 
-		if string(body) == "pending" {
-			time.Sleep(10 * time.Second)
-			resp, err = c.client.Do(req)
+			c.debug("status OK")
+
+			if string(body) == "pending" {
+				time.Sleep(2 * time.Second)
+				retry++
+				resp, err = c.client.Do(req)
+				if err != nil {
+					return body, errors.Wrap(err, "pending failed")
+				}
+				c.debug("resp was %v", resp)
+			} else {
+				return body, nil
+			}
+		} else if resp.StatusCode == http.StatusFound {
+			str := resp.Header["Location"][0]
+
+			c.debug("Got 302 to %s", str)
+
+			req := c.prepareRequest(word, cmd, opts)
 			if err != nil {
-				return body, errors.Wrap(err, "pending failed")
+				return []byte{}, errors.Wrap(err, "Cannot handle redirect")
+			}
+
+			resp, err = c.client.Do(req)
+			retry++
+			if err != nil {
+				return []byte{}, errors.Wrap(err, "client.Do failed")
 			}
 			c.debug("resp was %v", resp)
+		} else {
+			return body, errors.Wrapf(err, "bad status code: %v body: %q", resp.Status, body)
 		}
-	} else if resp.StatusCode == http.StatusFound {
-		str := resp.Header["Location"][0]
-
-		c.debug("Got 302 to %s", str)
-
-		req := c.prepareRequest(word, cmd, opts)
-		if err != nil {
-			return []byte{}, errors.Wrap(err, "Cannot handle redirect")
-		}
-
-		resp, err = c.client.Do(req)
-		if err != nil {
-			return []byte{}, errors.Wrap(err, "client.Do failed")
-		}
-		c.debug("resp was %v", resp)
-	} else {
-		return body, errors.Wrapf(err, "bad status code: %v body: %q", resp.Status, body)
 	}
-
 	return body, err
 }
 
