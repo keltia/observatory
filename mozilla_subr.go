@@ -86,7 +86,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 	resp, err := c.client.Do(req)
 	if err != nil {
 		c.debug("err=%#v", err)
-		return []byte{}, errors.Wrap(err, "1st call failed")
+		return []byte{}, errors.Wrap(err, "1st call")
 	}
 	c.debug("resp=%#v", resp)
 
@@ -97,7 +97,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 
 		body, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return []byte{}, errors.Wrap(err, "can not read body")
+			return []byte{}, errors.Wrapf(err, "body read, retry=%d", retry)
 		}
 		defer resp.Body.Close()
 
@@ -112,7 +112,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 				retry++
 				resp, err = c.client.Do(req)
 				if err != nil {
-					return body, errors.Wrap(err, "pending failed")
+					return body, errors.Wrapf(err, "pending, retry=%d", retry)
 				}
 				c.debug("resp was %v", resp)
 			} else {
@@ -125,7 +125,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 
 			req := c.prepareRequest(word, cmd, opts)
 			if err != nil {
-				return []byte{}, errors.Wrap(err, "Cannot handle redirect")
+				return []byte{}, errors.Wrap(err, "redirect")
 			}
 
 			resp, err = c.client.Do(req)
@@ -135,7 +135,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 			}
 			c.debug("resp was %v", resp)
 		} else {
-			return body, errors.Wrapf(err, "bad status code: %v body: %q", resp.Status, body)
+			return body, errors.Wrapf(err, "status: %v body: %q", resp.Status, body)
 		}
 	}
 	return body, err
@@ -154,13 +154,13 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 		body = body + "&rescan=true"
 		ret, err := c.callAPI("POST", "analyze", body, opts)
 		if err != nil {
-			return nil, errors.Wrapf(err, "getAnalyze - ret: %v", ret)
+			return nil, errors.Wrapf(err, "getAnalyze - POST: %v", ret)
 		}
 	}
 
 	r, err := c.callAPI("GET", "analyze", "", opts)
 	if err != nil {
-		return &ar, errors.Wrap(err, "getAnalyze")
+		return &ar, errors.Wrap(err, "getAnalyze - GET")
 	}
 
 	err = json.Unmarshal(r, &ar)
