@@ -6,6 +6,9 @@ import (
 	"net/url"
 	"testing"
 	"time"
+
+	"github.com/goware/httpmock"
+	"github.com/stretchr/testify/assert"
 )
 
 const testURL = "http://localhost:10000"
@@ -32,6 +35,11 @@ func TestMyRedirect(t *testing.T) {
 }
 
 func TestAddQueryParameters(t *testing.T) {
+	p := AddQueryParameters("", map[string]string{})
+	assert.Equal(t, "", p)
+}
+
+func TestAddQueryParameters_1(t *testing.T) {
 	p := AddQueryParameters("", map[string]string{"": ""})
 	assert.Equal(t, "?=", p)
 }

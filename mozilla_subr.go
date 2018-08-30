@@ -28,6 +28,9 @@ func myRedirect(req *http.Request, via []*http.Request) error {
 // AddQueryParameters adds query parameters to the URL.
 func AddQueryParameters(baseURL string, queryParams map[string]string) string {
 	params := url.Values{}
+	if len(queryParams) == 0 {
+		return baseURL
+	}
 	for key, value := range queryParams {
 		params.Add(key, value)
 	}
