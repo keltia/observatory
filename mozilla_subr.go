@@ -143,7 +143,7 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 		body = body + "&rescan=true"
 		ret, err := c.callAPI("POST", "analyze", body, opts)
 		if err != nil {
-			return &Analyze{}, errors.Wrapf(err, "getAnalyze - POST: %v", ret)
+			return &Analyze{}, errors.Wrapf(err, "getAnalyze - POST: %s", string(ret))
 		}
 	}
 
