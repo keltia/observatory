@@ -80,10 +80,12 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 		req.ContentLength = int64(buf.Len())
 	}
 
+	c.debug("req=%#v", req)
+
 	resp, err := c.client.Do(req)
 	if err != nil {
 		c.debug("err=%#v", err)
-		return []byte{}, errors.Wrap(err, "1st call")
+		return body, errors.Wrap(err, "1st call")
 	}
 	defer resp.Body.Close()
 
