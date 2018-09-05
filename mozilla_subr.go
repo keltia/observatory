@@ -28,6 +28,9 @@ func myRedirect(req *http.Request, via []*http.Request) error {
 // AddQueryParameters adds query parameters to the URL.
 func AddQueryParameters(baseURL string, queryParams map[string]string) string {
 	params := url.Values{}
+	if len(queryParams) == 0 {
+		return baseURL
+	}
 	for key, value := range queryParams {
 		params.Add(key, value)
 	}
@@ -38,20 +41,13 @@ func AddQueryParameters(baseURL string, queryParams map[string]string) string {
 func (c *Client) prepareRequest(method, what string, opts map[string]string) (req *http.Request) {
 	var endPoint string
 
-	// This allow for overriding baseurl for tests
-	if c.baseurl != "" {
-		endPoint = fmt.Sprintf("%s/%s", c.baseurl, what)
-	} else {
-		endPoint = fmt.Sprintf("%s/%s", baseURL, what)
-	}
+	endPoint = fmt.Sprintf("%s/%s", c.baseurl, what)
 
 	c.verbose("Options:\n%v", opts)
 	baseURL := AddQueryParameters(endPoint, opts)
 	c.debug("baseURL: %s", baseURL)
 
 	req, _ = http.NewRequest(method, baseURL, nil)
-
-	c.debug("req=%#v", req)
 
 	// We need these when we POST
 	if method == "POST" {
@@ -84,10 +80,12 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 		req.ContentLength = int64(buf.Len())
 	}
 
+	c.debug("req=%#v", req)
+
 	resp, err := c.client.Do(req)
 	if err != nil {
 		c.debug("err=%#v", err)
-		return []byte{}, errors.Wrap(err, "1st call")
+		return body, errors.Wrap(err, "1st call")
 	}
 	defer resp.Body.Close()
 
@@ -158,7 +156,7 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 		body = body + "&rescan=true"
 		ret, err := c.callAPI("POST", "analyze", body, opts)
 		if err != nil {
-			return nil, errors.Wrapf(err, "getAnalyze - POST: %v", ret)
+			return &Analyze{}, errors.Wrapf(err, "getAnalyze - POST: %v", ret)
 		}
 	}
 
