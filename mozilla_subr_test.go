@@ -1,11 +1,13 @@
 package observatory
 
 import (
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"testing"
 	"time"
 
+	"github.com/h2non/gock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -166,22 +168,74 @@ func BeforeAPI(t *testing.T) {
 }
 
 func TestClient_CallAPI(t *testing.T) {
-	/*	c, err := NewClient(Config{Timeout: 10, BaseURL: testURL, Log: 2})
-		assert.NoError(t, err)
-		assert.Equal(t, testURL, c.baseurl)
+	defer gock.Off()
 
-		site := "lbl.gov"
+	site := "www.ssllabs.com"
 
-		BeforeAPI(t)
-		opts := map[string]string{
-			"host": site,
-		}
+	ftr := `{"error":"recent-scan-not-found","text":"Recently completed scan for www.ssllabs.com not found"}`
 
-		body := "hidden=true&rescan=true"
-		ret, err := c.callAPI("POST", "analyze", body, opts)
+	gock.New(baseURL).
+		Post("analyze").
+		MatchParam("host", site).
+		MatchHeaders(map[string]string{
+			"content-type": "application/json",
+			"accept":       "application/json",
+		}).
+		BodyString("hidden=true").
+		Reply(200).
+		BodyString(ftr)
 
-		assert.NoError(t, err)
-		assert.Equal(t, ftq, ret)
+	c, err := NewClient(Config{Timeout: 10, Log: 2})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
 
-	*/
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	opts := map[string]string{
+		"host": site,
+	}
+
+	body := "hidden=true"
+	ret, err := c.callAPI("POST", "analyze", body, opts)
+
+	assert.Error(t, err)
+	assert.Equal(t, ftr, string(ret))
+}
+
+func TestClient_GetAnalyse(t *testing.T) {
+	defer gock.Off()
+
+	site := "www.ssllabs.com"
+
+	ftr, err := ioutil.ReadFile("testdata/ssllabs-post.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Post("analyze").
+		MatchParam("host", site).
+		MatchHeaders(map[string]string{
+			"content-type": "application/json",
+			"accept":       "application/json",
+		}).
+		BodyString("hidden=true&rescan=true").
+		Reply(200).
+		BodyString(string(ftr))
+
+	c, err := NewClient(Config{Timeout: 10, Log: 2})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	opts := map[string]string{
+		"host": site,
+	}
+
+	body := "hidden=true&rescan=true"
+	ret, err := c.callAPI("POST", "analyze", body, opts)
+
+	assert.Error(t, err)
+	assert.Equal(t, string(ftr), string(ret))
 }
