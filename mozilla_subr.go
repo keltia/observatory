@@ -74,8 +74,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 
 	// If we have a POST and a body, insert them.
 	if sbody != "" && word == "POST" {
-		body := []byte(sbody)
-		buf := bytes.NewReader(body)
+		buf := bytes.NewBufferString(sbody)
 		req.Body = ioutil.NopCloser(buf)
 		req.ContentLength = int64(buf.Len())
 	}
