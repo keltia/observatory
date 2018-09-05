@@ -1,17 +1,15 @@
 package observatory
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/url"
 	"testing"
 	"time"
 
-	"github.com/goware/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
-const testURL = "http://localhost:10000"
+const testURL = "http://127.0.0.1:10000"
 
 func TestToDuration(t *testing.T) {
 	testData := []struct {
@@ -111,4 +109,77 @@ func TestPrepareRequest_4(t *testing.T) {
 	assert.Equal(t, "POST", req.Method)
 	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 	assert.Equal(t, "application/json", req.Header.Get("Accept"))
+}
+
+var (
+	ftr []byte
+	ftq []byte
+)
+
+func BeforeAPI(t *testing.T) {
+	/*	var err error
+
+
+		// define request->response pairs
+		request1, _ := url.Parse(testURL + "/analyze?host=lbl.gov")
+		request2, _ := url.Parse(testURL + "/getScanResults?scan=8442544")
+
+		t.Logf("r1=%s", request1.String())
+		ftq, err = ioutil.ReadFile("testdata/lbl.gov.json")
+		assert.NoError(t, err)
+
+		ftr, err = ioutil.ReadFile("testdata/lbl.gov.data.json")
+		assert.NoError(t, err)
+
+		aresp := []httpmock.MockResponse{
+			{
+				Request: http.Request{
+					Method: "POST",
+					URL:    request1,
+					Header: map[string][]string{
+						"content-type": {"application/json"},
+						"accept":       {"application/json"},
+					},
+					ContentLength: int64(len("hidden=true&rescan=true")),
+					Body:          ioutil.NopCloser(strings.NewReader("hidden=true&rescan=true")),
+				},
+				Response: httpmock.Response{
+					StatusCode: 200,
+					Body:       string(ftq),
+				},
+			},
+			{
+				Request: http.Request{
+					Method: "GET",
+					URL:    request2,
+				},
+				Response: httpmock.Response{
+					StatusCode: 200,
+					Body:       string(ftr),
+				},
+			},
+		}
+
+		mockService.AddResponses(aresp)
+		t.Logf("respmap=%v", mockService.ResponseMap)
+	*/
+}
+
+func TestClient_CallAPI(t *testing.T) {
+	c, err := NewClient(Config{Timeout: 10, BaseURL: testURL, Log: 2})
+	assert.NoError(t, err)
+	assert.Equal(t, testURL, c.baseurl)
+
+	site := "lbl.gov"
+
+	BeforeAPI(t)
+	opts := map[string]string{
+		"host": site,
+	}
+
+	body := "hidden=true&rescan=true"
+	ret, err := c.callAPI("POST", "analyze", body, opts)
+
+	assert.NoError(t, err)
+	assert.Equal(t, ftq, ret)
 }
