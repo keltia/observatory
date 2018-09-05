@@ -108,6 +108,10 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 
 			c.debug("status OK")
 
+			if strings.Contains(string(body), "error:") {
+				return body, errors.New("error")
+			}
+
 			// We wait for FINISHED state
 			if !strings.Contains(string(body), "FINISHED") {
 				time.Sleep(2 * time.Second)
