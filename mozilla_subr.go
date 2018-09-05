@@ -79,7 +79,7 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 		req.ContentLength = int64(buf.Len())
 	}
 
-	c.debug("req=%#v", req)
+	c.debug("req=%#v body=%v", req, req.Body)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
