@@ -49,8 +49,6 @@ func (c *Client) prepareRequest(method, what string, opts map[string]string) (re
 
 	req, _ = http.NewRequest(method, baseURL, nil)
 
-	c.debug("req=%#v", req)
-
 	// We need these when we POST
 	if method == "POST" {
 		req.Header.Set("Content-Type", "application/json")
@@ -156,7 +154,7 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 		body = body + "&rescan=true"
 		ret, err := c.callAPI("POST", "analyze", body, opts)
 		if err != nil {
-			return nil, errors.Wrapf(err, "getAnalyze - POST: %v", ret)
+			return &Analyze{}, errors.Wrapf(err, "getAnalyze - POST: %v", ret)
 		}
 	}
 
