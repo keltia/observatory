@@ -182,7 +182,7 @@ func TestClient_CallAPI(t *testing.T) {
 		Reply(200).
 		BodyString(ftr)
 
-	c, err := NewClient(Config{Timeout: 10, Log: 2})
+	c, err := NewClient(Config{Timeout: 10})
 	assert.NoError(t, err)
 	assert.Equal(t, baseURL, c.baseurl)
 
