@@ -312,3 +312,35 @@ func TestClient_GetAnalyse(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, &report, ret)
 }
+
+// It will loop & retry
+func TestClient_GetAnalyse2(t *testing.T) {
+	defer gock.Off()
+
+	site := "www.ssllabs.com"
+
+	ftc, err := ioutil.ReadFile("testdata/ssllabs-post.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Get("analyze").
+		MatchParam("host", site).
+		Reply(200).
+		BodyString(string(ftc))
+
+	c, err := NewClient(Config{Timeout: 10, Log: 2})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	var report Analyze
+
+	err = json.Unmarshal(ftc, &report)
+	require.NoError(t, err)
+
+	raw, err := c.getAnalyze(site, false)
+	assert.Error(t, err)
+	t.Logf("error=%v raw=%v", err, raw)
+}
