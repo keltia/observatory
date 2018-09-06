@@ -72,7 +72,7 @@ func main() {
 			log.Fatalf("invalid scanid: %d: %v", scanid, err)
 		}
 
-		report, err := c.GetScanReport(scanid)
+		report, err := c.GetScanResults(scanid)
 		if err != nil {
 			log.Fatalf("impossible to get grade for '%s'\n", site)
 		}
