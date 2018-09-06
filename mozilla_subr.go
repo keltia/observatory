@@ -108,28 +108,53 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 	return body, err
 }
 
-// getAnalyze is an helper func for the API
+// getAnalyze is an helper func for the API — where the loop/waiting appears
 func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
-	var ar Analyze
+	var (
+		raw []byte
+		ar  Analyze
+	)
 
 	opts := map[string]string{
 		"host": site,
 	}
 
-	body := "hidden=true"
 	if force {
-		body = body + "&rescan=true"
+		body := "hidden=true&rescan=true"
 		ret, err := c.callAPI("POST", "analyze", body, opts)
-		if err != nil {
-			return &Analyze{}, errors.Wrapf(err, "getAnalyze - POST: %s", string(ret))
+		if err != nil || strings.Contains(string(ret), `"error":`) {
+			c.debug("post/1st call")
+			return &Analyze{}, errors.Wrapf(err, "post/Analyze: %s", string(ret))
 		}
 	}
 
-	r, err := c.callAPI("GET", "analyze", "", opts)
-	if err != nil {
-		return &ar, errors.Wrap(err, "getAnalyze - GET")
-	}
+	retry := 0
 
-	err = json.Unmarshal(r, &ar)
-	return &ar, errors.Wrapf(err, "getAnalyze: %#v", r)
+	// WAIT/RETRY loop is only for Analyse.
+	for {
+		if retry == c.retries {
+			c.debug("too many retries")
+			return &Analyze{}, fmt.Errorf("retries exceeded - raw=%v", raw)
+		}
+		raw, err := c.callAPI("GET", "analyze", "", opts)
+		if err != nil {
+			c.debug("get/analyse")
+			return &ar, errors.Wrapf(err, "get/Analyze: %v", raw)
+		}
+
+		if strings.Contains(string(raw), `state":"PENDING"`) {
+			c.debug("PENDING retry=%d", retry)
+			time.Sleep(2 * time.Second)
+			retry++
+		}
+
+		if strings.Contains(string(raw), `state":"FINISHED"`) {
+			c.debug("FINISHED retry=%d", retry)
+			c.debug("raw/analyse=%s", string(raw))
+
+			err := json.Unmarshal(raw, &ar)
+			return &ar, errors.Wrap(err, "unmarshall")
+		}
+		c.debug("loop")
+	}
 }
