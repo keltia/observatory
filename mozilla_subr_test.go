@@ -115,11 +115,6 @@ func TestPrepareRequest_4(t *testing.T) {
 	assert.Equal(t, "application/json", req.Header.Get("Accept"))
 }
 
-var (
-	ftr []byte
-	ftq []byte
-)
-
 func BeforeAPI(t *testing.T) {
 	/*	var err error
 
