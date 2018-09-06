@@ -186,7 +186,7 @@ func TestClient_GetScanID(t *testing.T) {
 
 }
 
-func TestClient_GetScanReport(t *testing.T) {
+func TestClient_GetScanResults(t *testing.T) {
 	defer gock.Off()
 
 	ftc, err := ioutil.ReadFile("testdata/ssllabs-8507653.json")
@@ -206,6 +206,31 @@ func TestClient_GetScanReport(t *testing.T) {
 	defer gock.RestoreClient(c.client)
 
 	ret, err := c.GetScanResults(8507653)
+	assert.NoError(t, err)
+	assert.EqualValues(t, ftc, ret)
+
+}
+
+func TestClient_GetScanReport(t *testing.T) {
+	defer gock.Off()
+
+	ftc, err := ioutil.ReadFile("testdata/ssllabs-8507653.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Get("getScanResults").
+		MatchParam("scan", "8507653").
+		Reply(200).
+		BodyString(string(ftc))
+
+	c, err := NewClient(Config{Timeout: 10})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	ret, err := c.GetScanReport(8507653)
 	assert.NoError(t, err)
 	assert.EqualValues(t, ftc, ret)
 

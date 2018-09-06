@@ -123,6 +123,20 @@ func (c *Client) GetScanResults(scanID int) ([]byte, error) {
 	return s, errors.Wrap(err, "GetScanResults")
 }
 
+// GetScanReport returns the full scan report
+func (c *Client) GetScanReport(scanID int) ([]byte, error) {
+	c.debug("GetScanReport (deprecated)")
+
+	opts := map[string]string{
+		"scan": fmt.Sprintf("%d", scanID),
+	}
+
+	s, err := c.callAPI("GET", "getScanResults", "", opts)
+
+	// Return raw json
+	return s, errors.Wrap(err, "GetScanResults")
+}
+
 // GetHostHistory returns the list of recent scans
 func (c *Client) GetHostHistory(site string) ([]HostHistory, error) {
 	c.debug("GetSiteHistory")
