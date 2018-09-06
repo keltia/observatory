@@ -23,7 +23,7 @@ const (
 	DefaultRetry = 5
 
 	// MyVersion is the API version
-	MyVersion = "1.1.1"
+	MyVersion = "1.2.0"
 
 	// MyName is the name used for the configuration
 	MyName = "observatory"
@@ -109,9 +109,9 @@ func (c *Client) GetScanID(site string) (int, error) {
 	return ar.ScanID, errors.Wrap(err, "GetScanID failed")
 }
 
-// GetScanReport returns the full scan report
-func (c *Client) GetScanReport(scanID int) ([]byte, error) {
-	c.debug("GetScanReport")
+// GetScanResults returns the full scan report
+func (c *Client) GetScanResults(scanID int) ([]byte, error) {
+	c.debug("GetScanResults")
 
 	opts := map[string]string{
 		"scan": fmt.Sprintf("%d", scanID),
@@ -120,15 +120,33 @@ func (c *Client) GetScanReport(scanID int) ([]byte, error) {
 	s, err := c.callAPI("GET", "getScanResults", "", opts)
 
 	// Return raw json
-	return s, errors.Wrap(err, "GetScanReport")
+	return s, errors.Wrap(err, "GetScanResults")
+}
+
+// GetScanReport returns the full scan report
+func (c *Client) GetScanReport(scanID int) ([]byte, error) {
+	c.debug("GetScanReport (deprecated)")
+
+	opts := map[string]string{
+		"scan": fmt.Sprintf("%d", scanID),
+	}
+
+	s, err := c.callAPI("GET", "getScanResults", "", opts)
+
+	// Return raw json
+	return s, errors.Wrap(err, "GetScanResults")
 }
 
 // GetHostHistory returns the list of recent scans
 func (c *Client) GetHostHistory(site string) ([]HostHistory, error) {
 	c.debug("GetSiteHistory")
 
+	if site == "" {
+		return nil, errors.New("empty site")
+	}
+
 	opts := map[string]string{
-		"scan": site,
+		"host": site,
 	}
 
 	s, err := c.callAPI("GET", "getHostHistory", "", opts)

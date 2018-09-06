@@ -1,12 +1,16 @@
 package observatory
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"testing"
 	"time"
 
+	"github.com/h2non/gock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const testURL = "http://127.0.0.1:10000"
@@ -111,11 +115,6 @@ func TestPrepareRequest_4(t *testing.T) {
 	assert.Equal(t, "application/json", req.Header.Get("Accept"))
 }
 
-var (
-	ftr []byte
-	ftq []byte
-)
-
 func BeforeAPI(t *testing.T) {
 	/*	var err error
 
@@ -166,22 +165,182 @@ func BeforeAPI(t *testing.T) {
 }
 
 func TestClient_CallAPI(t *testing.T) {
-	/*	c, err := NewClient(Config{Timeout: 10, BaseURL: testURL, Log: 2})
-		assert.NoError(t, err)
-		assert.Equal(t, testURL, c.baseurl)
+	defer gock.Off()
 
-		site := "lbl.gov"
+	site := "www.ssllabs.com"
 
-		BeforeAPI(t)
-		opts := map[string]string{
-			"host": site,
-		}
+	ftr := `{"error":"recent-scan-not-found","text":"Recently completed scan for www.ssllabs.com not found"}`
 
-		body := "hidden=true&rescan=true"
-		ret, err := c.callAPI("POST", "analyze", body, opts)
+	gock.New(baseURL).
+		Post("analyze").
+		MatchParam("host", site).
+		MatchHeaders(map[string]string{
+			"content-type": "application/json",
+			"accept":       "application/json",
+		}).
+		BodyString("hidden=true").
+		Reply(200).
+		BodyString(ftr)
 
-		assert.NoError(t, err)
-		assert.Equal(t, ftq, ret)
+	c, err := NewClient(Config{Timeout: 10})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
 
-	*/
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	opts := map[string]string{
+		"host": site,
+	}
+
+	body := "hidden=true"
+	ret, err := c.callAPI("POST", "analyze", body, opts)
+
+	assert.NoError(t, err)
+	assert.Equal(t, ftr, string(ret))
+}
+
+func TestClient_CallAPI2(t *testing.T) {
+	defer gock.Off()
+
+	site := "www.ssllabs.com"
+
+	ftr, err := ioutil.ReadFile("testdata/ssllabs-post.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Post("analyze").
+		MatchParam("host", site).
+		MatchHeaders(map[string]string{
+			"content-type": "application/json",
+			"accept":       "application/json",
+		}).
+		BodyString("hidden=true&rescan=true").
+		Reply(200).
+		BodyString(string(ftr))
+
+	c, err := NewClient(Config{Timeout: 10})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	opts := map[string]string{
+		"host": site,
+	}
+
+	body := "hidden=true&rescan=true"
+	ret, err := c.callAPI("POST", "analyze", body, opts)
+
+	assert.NoError(t, err)
+	assert.Equal(t, ftr, ret)
+}
+
+func TestClient_CallAPI3(t *testing.T) {
+	defer gock.Off()
+
+	site := "www.ssllabs.com"
+
+	ftr, err := ioutil.ReadFile("testdata/ssllabs-get.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Get("analyze").
+		MatchParam("host", site).
+		Reply(200).
+		BodyString(string(ftr))
+
+	c, err := NewClient(Config{Timeout: 10})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	opts := map[string]string{
+		"host": site,
+	}
+
+	ret, err := c.callAPI("GET", "analyze", "", opts)
+
+	assert.NoError(t, err)
+	assert.Equal(t, ftr, ret)
+}
+
+func TestClient_GetAnalyse(t *testing.T) {
+	defer gock.Off()
+
+	site := "www.ssllabs.com"
+
+	ftr, err := ioutil.ReadFile("testdata/ssllabs-post.json")
+	assert.NoError(t, err)
+
+	ftc, err := ioutil.ReadFile("testdata/ssllabs-get.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Post("analyze").
+		MatchParam("host", site).
+		MatchHeaders(map[string]string{
+			"content-type": "application/json",
+			"accept":       "application/json",
+		}).
+		BodyString("hidden=true&rescan=true").
+		Reply(200).
+		BodyString(string(ftr))
+
+	gock.New(baseURL).
+		Get("analyze").
+		MatchParam("host", site).
+		Reply(200).
+		BodyString(string(ftc))
+
+	c, err := NewClient(Config{Timeout: 10, Log: 2})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	var report Analyze
+
+	err = json.Unmarshal(ftc, &report)
+	require.NoError(t, err)
+
+	ret, err := c.getAnalyze(site, true)
+	assert.NoError(t, err)
+	assert.EqualValues(t, &report, ret)
+}
+
+// It will loop & retry
+func TestClient_GetAnalyse2(t *testing.T) {
+	defer gock.Off()
+
+	site := "www.ssllabs.com"
+
+	ftc, err := ioutil.ReadFile("testdata/ssllabs-post.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Get("analyze").
+		MatchParam("host", site).
+		Reply(200).
+		BodyString(string(ftc))
+
+	c, err := NewClient(Config{Timeout: 10, Log: 2})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	var report Analyze
+
+	err = json.Unmarshal(ftc, &report)
+	require.NoError(t, err)
+
+	raw, err := c.getAnalyze(site, false)
+	assert.Error(t, err)
+	t.Logf("error=%v raw=%v", err, raw)
 }

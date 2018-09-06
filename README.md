@@ -18,9 +18,29 @@ Go wrapper for [Mozilla Observatory](https://observatory.mozilla.org/) API.
 
 `github.com/keltia/observatory` is a Go module (you can use either Go 1.10 with `vgo` or 1.11+).  The API exposed follows the Semantic Versioning scheme to guarantee a consistent API compatibility.
 
-## USAGE
+## Installation
+
+You need to install my `proxy` module before if you are using Go 1.10.x or earlier.
+
+    go get github.com/keltia/proxy
+
+With Go 1.11+ and its modules support, it should work out of the box with
+
+    go get github.com/keltia/observatory/cmd/...
+
+if you have the `GO111MODULE` environment variable set on `on`.
+
+## CLI
 
 There is a small example program included in `cmd/observatory` to either show the grade of a given site or JSON dump of the detailed report.
+
+Easy to use:
+```
+    $ observatory www.ssllabs.com
+    observatory Wrapper: 0.3.0 API version 1.2.0
+    
+    Grade for 'www.ssllabs.com' is A+
+```
 
 You can use [`jq`](https://stedolan.github.io/jq/) to display the output of `observatory -d <site>` in a colorised way:
 
@@ -37,8 +57,11 @@ As with many API wrappers, you will need to first create a client with some opti
     if err != nil {
         log.Fatalf("error: %v", err)
     }
+```
 
+If you want to change the default options, you need to create a `ssllabs.Config` object and pass it to `NewClient`:
 
+``` go
     // With some options, timeout at 15s, caching for 10s and debug-like verbosity
     cnf := observatory.Config{
         Timeout:15,
@@ -52,12 +75,24 @@ As with many API wrappers, you will need to first create a client with some opti
     }
 ```
 
-For the `GetDetailedReport()` call, the raw JSON object will be returned (and presumably handled by `jq`).
+OPTIONS for NewClient()
+
+| Option  | Type | Description |
+| ------- | ---- | ----------- |
+| Timeout | int  | time for connections (default: 10s) |
+| Log     | int  | 1: verbose, 2: debug (default: 0) |
+| Retries | int  | Number of retries when not FINISHED (default: 5) |
+| Refresh | bool | Force refresh of the sites (default: false) |
+
+For the `GetScanResults()` call, the raw JSON object will be returned (and presumably handled by `jq`).
 
 ``` go
     // Simplest way
     c, _ := observatory.NewClient()
-    report, err := c.GetDetailedReport("example.com")
+    
+    scanid, err := c.GetScanID("example.com")
+    
+    report, err := c.GetScanResults(scanid)
     if err != nil {
         log.Fatalf("error: %v", err)
     }
@@ -76,15 +111,28 @@ The `GetHostHistory()` returns the list of recent scans for the given site:
     }
 ```
 
-OPTIONS
+There is no top-level `GetGrade` function but it is very easy to implement:
 
-| Option  | Type | Description |
-| ------- | ---- | ----------- |
-| Timeout | int  | time for connections (default: 10s) |
-| Log     | int  | 1: verbose, 2: debug (default: 0) |
-| Retries | int  | Number of retries when not FINISHED (default: 5) |
-| Refresh | bool | Force refresh of the sites (default: false) |
+``` go
+    func GetGrade(site string) string {
+        g, _ := observatory.NewClient().GetGrade(site)
+        return g
+    }
+```
 
+### NOTE
+
+v1.1.x implemented the `GetScanReport` call but that does not correspond to any real API calls.  It is now just an alias to `GetScanResults`.  DO NOT USE IT.  DEPRECATED.
+
+### API Calls Implemented
+
+- `analyze`
+- `getScanResults`
+- `getHostHistory`
+
+### API NOT Implemented
+
+- `getRecentScans`
 
 ## Using behind a web Proxy
 

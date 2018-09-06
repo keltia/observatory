@@ -24,19 +24,16 @@ ${BIN}: ${GSRCS} ${SRCS} ${USRCS}
 ${EXE}: ${GSRCS} ${SRCS} ${USRCS}
 	GOOS=windows ${GO} build ${OPTS} ./cmd/...
 
-build: ${SRCS} ${USRCS}
-	${GO} build ${OPTS} ./cmd/...
-
-test: build
-	${GO} test ./...
+test: ${BIN}
+	${GO} test .
 
 windows: ${EXE}
 	GOOS=windows ${GO} build ${OPTS} ./cmd/...
 
-install:
+install: ${BIN}
 	${GO} install ${OPTS} ./cmd/...
 
-lint:
+lint: ${GSRCS} ${SRCS} ${USRCS}
 	gometalinter .
 
 clean:

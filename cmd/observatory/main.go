@@ -19,7 +19,7 @@ import (
 
 const (
 	// MyVersion is for the app
-	MyVersion = "0.2.0"
+	MyVersion = "0.3.0"
 )
 
 var (
@@ -72,7 +72,7 @@ func main() {
 			log.Fatalf("invalid scanid: %d: %v", scanid, err)
 		}
 
-		report, err := c.GetScanReport(scanid)
+		report, err := c.GetScanResults(scanid)
 		if err != nil {
 			log.Fatalf("impossible to get grade for '%s'\n", site)
 		}
