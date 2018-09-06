@@ -109,9 +109,9 @@ func (c *Client) GetScanID(site string) (int, error) {
 	return ar.ScanID, errors.Wrap(err, "GetScanID failed")
 }
 
-// GetScanReport returns the full scan report
-func (c *Client) GetScanReport(scanID int) ([]byte, error) {
-	c.debug("GetScanReport")
+// GetScanResults returns the full scan report
+func (c *Client) GetScanResults(scanID int) ([]byte, error) {
+	c.debug("GetScanResults")
 
 	opts := map[string]string{
 		"scan": fmt.Sprintf("%d", scanID),
@@ -120,7 +120,7 @@ func (c *Client) GetScanReport(scanID int) ([]byte, error) {
 	s, err := c.callAPI("GET", "getScanResults", "", opts)
 
 	// Return raw json
-	return s, errors.Wrap(err, "GetScanReport")
+	return s, errors.Wrap(err, "GetScanResults")
 }
 
 // GetHostHistory returns the list of recent scans
