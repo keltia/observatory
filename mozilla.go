@@ -127,8 +127,12 @@ func (c *Client) GetScanReport(scanID int) ([]byte, error) {
 func (c *Client) GetHostHistory(site string) ([]HostHistory, error) {
 	c.debug("GetSiteHistory")
 
+	if site == "" {
+		return nil, errors.New("empty site")
+	}
+
 	opts := map[string]string{
-		"scan": site,
+		"host": site,
 	}
 
 	s, err := c.callAPI("GET", "getHostHistory", "", opts)
