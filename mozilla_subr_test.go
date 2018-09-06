@@ -1,6 +1,7 @@
 package observatory
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/h2non/gock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const testURL = "http://127.0.0.1:10000"
@@ -279,6 +281,9 @@ func TestClient_GetAnalyse(t *testing.T) {
 	ftr, err := ioutil.ReadFile("testdata/ssllabs-post.json")
 	assert.NoError(t, err)
 
+	ftc, err := ioutil.ReadFile("testdata/ssllabs-get.json")
+	assert.NoError(t, err)
+
 	gock.New(baseURL).
 		Post("analyze").
 		MatchParam("host", site).
@@ -290,6 +295,12 @@ func TestClient_GetAnalyse(t *testing.T) {
 		Reply(200).
 		BodyString(string(ftr))
 
+	gock.New(baseURL).
+		Get("analyze").
+		MatchParam("host", site).
+		Reply(200).
+		BodyString(string(ftc))
+
 	c, err := NewClient(Config{Timeout: 10, Log: 2})
 	assert.NoError(t, err)
 	assert.Equal(t, baseURL, c.baseurl)
@@ -297,13 +308,12 @@ func TestClient_GetAnalyse(t *testing.T) {
 	gock.InterceptClient(c.client)
 	defer gock.RestoreClient(c.client)
 
-	opts := map[string]string{
-		"host": site,
-	}
+	var report Analyze
 
-	body := "hidden=true&rescan=true"
-	ret, err := c.callAPI("POST", "analyze", body, opts)
+	err = json.Unmarshal(ftc, &report)
+	require.NoError(t, err)
 
-	assert.Error(t, err)
-	assert.Equal(t, string(ftr), string(ret))
+	ret, err := c.getAnalyze(site, true)
+	assert.NoError(t, err)
+	assert.EqualValues(t, &report, ret)
 }
