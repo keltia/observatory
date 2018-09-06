@@ -58,11 +58,8 @@ func (c *Client) prepareRequest(method, what string, opts map[string]string) (re
 	return
 }
 
+// callAPI is the main API call — straightforward, clean logic
 func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byte, error) {
-	var body []byte
-
-	retry := 0
-
 	c.debug("callAPI")
 	req := c.prepareRequest(word, cmd, opts)
 	if req == nil {
@@ -84,48 +81,29 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 	resp, err := c.client.Do(req)
 	if err != nil {
 		c.debug("err=%#v", err)
-		return body, errors.Wrap(err, "1st call")
+		return []byte{}, errors.Wrap(err, "1st call")
 	}
 	defer resp.Body.Close()
 
 	c.debug("resp=%#v", resp)
 
-	for {
-		if retry == c.retries {
-			return nil, errors.New("retries")
+	c.debug("read body")
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, "body read")
+	}
+
+	c.debug("body=%v", string(body))
+
+	if resp.StatusCode == http.StatusOK {
+
+		c.debug("status OK")
+
+		if strings.Contains(string(body), "error:") {
+			return body, errors.New("error")
 		}
-
-		c.debug("read body")
-		body, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return []byte{}, errors.Wrapf(err, "body read, retry=%d", retry)
-		}
-
-		c.debug("body=%v", string(body))
-
-		if resp.StatusCode == http.StatusOK {
-
-			c.debug("status OK")
-
-			if strings.Contains(string(body), "error:") {
-				return body, errors.New("error")
-			}
-
-			// We wait for FINISHED state
-			if !strings.Contains(string(body), "FINISHED") {
-				time.Sleep(2 * time.Second)
-				retry++
-				resp, err = c.client.Do(req)
-				if err != nil {
-					return body, errors.Wrapf(err, "pending, retry=%d", retry)
-				}
-				c.debug("resp was %v", resp)
-			} else {
-				return body, nil
-			}
-		} else {
-			return body, errors.Wrapf(err, "status: %v body: %q", resp.Status, body)
-		}
+	} else {
+		return body, errors.Wrapf(err, "status: %v body: %q", resp.Status, body)
 	}
 	return body, err
 }

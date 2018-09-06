@@ -199,8 +199,76 @@ func TestClient_CallAPI(t *testing.T) {
 	body := "hidden=true"
 	ret, err := c.callAPI("POST", "analyze", body, opts)
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, ftr, string(ret))
+}
+
+func TestClient_CallAPI2(t *testing.T) {
+	defer gock.Off()
+
+	site := "www.ssllabs.com"
+
+	ftr, err := ioutil.ReadFile("testdata/ssllabs-post.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Post("analyze").
+		MatchParam("host", site).
+		MatchHeaders(map[string]string{
+			"content-type": "application/json",
+			"accept":       "application/json",
+		}).
+		BodyString("hidden=true&rescan=true").
+		Reply(200).
+		BodyString(string(ftr))
+
+	c, err := NewClient(Config{Timeout: 10})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	opts := map[string]string{
+		"host": site,
+	}
+
+	body := "hidden=true&rescan=true"
+	ret, err := c.callAPI("POST", "analyze", body, opts)
+
+	assert.NoError(t, err)
+	assert.Equal(t, ftr, ret)
+}
+
+func TestClient_CallAPI3(t *testing.T) {
+	defer gock.Off()
+
+	site := "www.ssllabs.com"
+
+	ftr, err := ioutil.ReadFile("testdata/ssllabs-get.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Get("analyze").
+		MatchParam("host", site).
+		Reply(200).
+		BodyString(string(ftr))
+
+	c, err := NewClient(Config{Timeout: 10})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	opts := map[string]string{
+		"host": site,
+	}
+
+	ret, err := c.callAPI("GET", "analyze", "", opts)
+
+	assert.NoError(t, err)
+	assert.Equal(t, ftr, ret)
 }
 
 func TestClient_GetAnalyse(t *testing.T) {
