@@ -150,6 +150,14 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 			continue
 		}
 
+		if strings.Contains(string(raw), `"state":"FAILED"`) {
+			c.debug("FAILED retry=%d", retry)
+			c.debug("raw/analyse=%s", string(raw))
+
+			err := json.Unmarshal(raw, &ar)
+			return &ar, errors.Wrap(err, "unmarshall")
+		}
+
 		if strings.Contains(string(raw), `state":"FINISHED"`) {
 			c.debug("FINISHED retry=%d", retry)
 			c.debug("raw/analyse=%s", string(raw))
