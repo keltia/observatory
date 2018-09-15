@@ -43,7 +43,7 @@ func (c *Client) prepareRequest(method, what string, opts map[string]string) (re
 
 	endPoint = fmt.Sprintf("%s/%s", c.baseurl, what)
 
-	c.verbose("Options:\n%v", opts)
+	c.debug("Options:\n%v", opts)
 	baseURL := AddQueryParameters(endPoint, opts)
 	c.debug("baseURL: %s", baseURL)
 
@@ -132,10 +132,11 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 
 	// WAIT/RETRY loop is only for Analyse.
 	for {
-		if retry == c.retries {
+		if retry >= c.retries {
 			c.debug("too many retries")
 			return &Analyze{}, fmt.Errorf("retries exceeded - raw=%v", raw)
 		}
+
 		raw, err := c.callAPI("GET", "analyze", "", opts)
 		if err != nil {
 			c.debug("get/analyse")
@@ -146,6 +147,7 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 			c.debug("PENDING retry=%d", retry)
 			time.Sleep(2 * time.Second)
 			retry++
+			continue
 		}
 
 		if strings.Contains(string(raw), `state":"FINISHED"`) {
@@ -155,6 +157,6 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 			err := json.Unmarshal(raw, &ar)
 			return &ar, errors.Wrap(err, "unmarshall")
 		}
-		c.debug("loop")
+		c.debug("loop retry=%d", retry)
 	}
 }
