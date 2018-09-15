@@ -115,55 +115,6 @@ func TestPrepareRequest_4(t *testing.T) {
 	assert.Equal(t, "application/json", req.Header.Get("Accept"))
 }
 
-func BeforeAPI(t *testing.T) {
-	/*	var err error
-
-
-		// define request->response pairs
-		request1, _ := url.Parse(testURL + "/analyze?host=lbl.gov")
-		request2, _ := url.Parse(testURL + "/getScanResults?scan=8442544")
-
-		t.Logf("r1=%s", request1.String())
-		ftq, err = ioutil.ReadFile("testdata/lbl.gov.json")
-		assert.NoError(t, err)
-
-		ftr, err = ioutil.ReadFile("testdata/lbl.gov.data.json")
-		assert.NoError(t, err)
-
-		aresp := []httpmock.MockResponse{
-			{
-				Request: http.Request{
-					Method: "POST",
-					URL:    request1,
-					Header: map[string][]string{
-						"content-type": {"application/json"},
-						"accept":       {"application/json"},
-					},
-					ContentLength: int64(len("hidden=true&rescan=true")),
-					Body:          ioutil.NopCloser(strings.NewReader("hidden=true&rescan=true")),
-				},
-				Response: httpmock.Response{
-					StatusCode: 200,
-					Body:       string(ftq),
-				},
-			},
-			{
-				Request: http.Request{
-					Method: "GET",
-					URL:    request2,
-				},
-				Response: httpmock.Response{
-					StatusCode: 200,
-					Body:       string(ftr),
-				},
-			},
-		}
-
-		mockService.AddResponses(aresp)
-		t.Logf("respmap=%v", mockService.ResponseMap)
-	*/
-}
-
 func TestClient_CallAPI(t *testing.T) {
 	defer gock.Off()
 
@@ -343,4 +294,8 @@ func TestClient_GetAnalyse2(t *testing.T) {
 	raw, err := c.getAnalyze(site, false)
 	assert.Error(t, err)
 	t.Logf("error=%v raw=%v", err, raw)
+}
+
+func TestClient_GetScanReport2(t *testing.T) {
+
 }
