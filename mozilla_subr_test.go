@@ -296,6 +296,20 @@ func TestClient_GetAnalyse2(t *testing.T) {
 	t.Logf("error=%v raw=%v", err, raw)
 }
 
+func TestClient_GetAnalyseEmpty(t *testing.T) {
+	defer gock.Off()
+
+	site := ""
+
+	c, err := NewClient(Config{Timeout: 10})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	_, err = c.getAnalyze(site, false)
+	assert.Error(t, err)
+	assert.Equal(t, "empty site", err.Error())
+}
+
 func TestClient_GetScanReport2(t *testing.T) {
 
 }
