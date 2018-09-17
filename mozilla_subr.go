@@ -115,6 +115,10 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 		ar  Analyze
 	)
 
+	if site == "" {
+		return &Analyze{}, fmt.Errorf("empty site")
+	}
+
 	opts := map[string]string{
 		"host": site,
 	}
