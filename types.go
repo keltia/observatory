@@ -53,7 +53,7 @@ type Analyze struct {
 type Scan struct {
 	Expectation      string `json:"expectation"`
 	Name             string `json:"name"`
-	Output           []byte `json:"output"`
+	Output           []byte `json:"-"`
 	Pass             bool   `json:"pass"`
 	Result           string `json:"result"`
 	ScoreDescription string `json:"score_description"`
