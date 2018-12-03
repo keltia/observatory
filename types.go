@@ -68,3 +68,19 @@ type HostHistory struct {
 	ScanID               int `json:"scan_id"`
 	Score                int
 }
+
+// Result is all the test results.
+type Result struct {
+	ContentSecurityPolicy      Scan
+	Contribute                 Scan
+	Cookies                    Scan
+	CrossOriginResourceSharing Scan
+	PublicKeyPinning           Scan
+	Redirection                Scan
+	ReferrerPolicy             Scan
+	StrictTransportSecurity    Scan
+	SubresourceIntegrity       Scan
+	XContentTypeOptions        Scan
+	XFrameOptions              Scan
+	XXSSProtection             Scan
+}
