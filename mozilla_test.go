@@ -235,3 +235,38 @@ func TestClient_GetScanReport(t *testing.T) {
 	assert.EqualValues(t, ftc, ret)
 
 }
+
+func TestClient_IsHTTPSonly(t *testing.T) {
+	defer gock.Off()
+
+	site := "www.ssllabs.com"
+
+	ftc, err := ioutil.ReadFile("testdata/ssllabs-get.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Get("analyze").
+		MatchParam("host", site).
+		Reply(200).
+		BodyString(string(ftc))
+
+	ftr, err := ioutil.ReadFile("testdata/ssllabs-8507653.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Get("getScanResults").
+		MatchParam("scan", "8507653").
+		Reply(200).
+		BodyString(string(ftr))
+
+	c, err := NewClient(Config{Timeout: 10})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	test, err := c.IsHTTPSonly(site)
+	assert.NoError(t, err)
+	assert.True(t, test)
+}

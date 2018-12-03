@@ -160,6 +160,28 @@ func (c *Client) GetHostHistory(site string) ([]HostHistory, error) {
 	return hs, errors.Wrap(err, "GetHostHistory failed")
 }
 
+// IsHTTPSonly checks whether a redir from http to https exist
+func (c *Client) IsHTTPSonly(site string) (bool, error) {
+	scanid, err := c.GetScanID(site)
+	if err != nil {
+		return false, errors.Wrap(err, "GetScanID")
+	}
+
+	rp, err := c.GetScanResults(scanid)
+	if err != nil {
+		return false, errors.Wrap(err, "GetScanResults")
+	}
+
+	var res Result
+
+	err = json.Unmarshal(rp, &res)
+	if err != nil {
+		return false, errors.Wrap(err, "unmarshal")
+	}
+
+	return res.Redirection.Pass, nil
+}
+
 // Version returns guess what?
 func Version() string {
 	return MyVersion
