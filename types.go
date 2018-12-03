@@ -15,7 +15,7 @@ type Client struct {
 	timeout   time.Duration
 
 	// Local cache for 5mn of last query
-	last Analyze
+	last *Analyze
 }
 
 // Config is for giving options to NewClient

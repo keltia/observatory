@@ -108,6 +108,17 @@ func (c *Client) callAPI(word, cmd, sbody string, opts map[string]string) ([]byt
 	return body, err
 }
 
+func isValid(ar *Analyze) bool {
+	if ar == nil {
+		return false
+	}
+
+	now := time.Now()
+	last, _ := time.Parse(time.RFC1123, ar.EndTime)
+	last = last.Add(10 * time.Minute)
+	return last.After(now)
+}
+
 // getAnalyze is an helper func for the API — where the loop/waiting appears
 func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 	var (
@@ -133,6 +144,11 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 	}
 
 	retry := 0
+
+	// Cached value is usable?
+	if isValid(c.last) {
+		return c.last, nil
+	}
 
 	// WAIT/RETRY loop is only for Analyse.
 	for {
@@ -167,6 +183,8 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 			c.debug("raw/analyse=%s", string(raw))
 
 			err := json.Unmarshal(raw, &ar)
+			// Store the last call
+			c.last = &ar
 			return &ar, errors.Wrap(err, "unmarshall")
 		}
 		c.debug("loop retry=%d", retry)
