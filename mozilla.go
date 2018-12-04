@@ -23,7 +23,7 @@ const (
 	DefaultRetry = 5
 
 	// MyVersion is the API version
-	MyVersion = "1.2.3"
+	MyVersion = "1.2.4"
 
 	// MyName is the name used for the configuration
 	MyName = "observatory"
