@@ -313,3 +313,19 @@ func TestClient_GetAnalyseEmpty(t *testing.T) {
 func TestClient_GetScanReport2(t *testing.T) {
 
 }
+
+func TestIsValid_Nil(t *testing.T) {
+	require.False(t, isValid(nil))
+}
+
+func TestIsValid_Old(t *testing.T) {
+	now := time.Now().Add(-1 * time.Minute)
+	ar := &Analyze{EndTime: now.Format(time.RFC1123)}
+	require.True(t, isValid(ar))
+}
+
+func TestIsValid_New(t *testing.T) {
+	now := time.Now().Add(-20 * time.Minute)
+	ar := &Analyze{EndTime: now.Format(time.RFC1123)}
+	require.False(t, isValid(ar))
+}

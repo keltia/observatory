@@ -15,7 +15,7 @@ type Client struct {
 	timeout   time.Duration
 
 	// Local cache for 5mn of last query
-	last Analyze
+	last *Analyze
 }
 
 // Config is for giving options to NewClient
@@ -53,7 +53,7 @@ type Analyze struct {
 type Scan struct {
 	Expectation      string `json:"expectation"`
 	Name             string `json:"name"`
-	Output           []byte `json:"output"`
+	Output           []byte `json:"-"`
 	Pass             bool   `json:"pass"`
 	Result           string `json:"result"`
 	ScoreDescription string `json:"score_description"`
@@ -67,4 +67,20 @@ type HostHistory struct {
 	Grade                string
 	ScanID               int `json:"scan_id"`
 	Score                int
+}
+
+// Result is all the test results.
+type Result struct {
+	ContentSecurityPolicy      Scan
+	Contribute                 Scan
+	Cookies                    Scan
+	CrossOriginResourceSharing Scan
+	PublicKeyPinning           Scan
+	Redirection                Scan
+	ReferrerPolicy             Scan
+	StrictTransportSecurity    Scan
+	SubresourceIntegrity       Scan
+	XContentTypeOptions        Scan
+	XFrameOptions              Scan
+	XXSSProtection             Scan
 }

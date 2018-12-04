@@ -23,7 +23,7 @@ const (
 	DefaultRetry = 5
 
 	// MyVersion is the API version
-	MyVersion = "1.2.3"
+	MyVersion = "1.2.4"
 
 	// MyName is the name used for the configuration
 	MyName = "observatory"
@@ -158,6 +158,28 @@ func (c *Client) GetHostHistory(site string) ([]HostHistory, error) {
 
 	err = json.Unmarshal(s, &hs)
 	return hs, errors.Wrap(err, "GetHostHistory failed")
+}
+
+// IsHTTPSonly checks whether a redir from http to https exist
+func (c *Client) IsHTTPSonly(site string) (bool, error) {
+	scanid, err := c.GetScanID(site)
+	if err != nil {
+		return false, errors.Wrap(err, "GetScanID")
+	}
+
+	rp, err := c.GetScanResults(scanid)
+	if err != nil {
+		return false, errors.Wrap(err, "GetScanResults")
+	}
+
+	var res Result
+
+	err = json.Unmarshal(rp, &res)
+	if err != nil {
+		return false, errors.Wrap(err, "unmarshal")
+	}
+
+	return res.Redirection.Pass, nil
 }
 
 // Version returns guess what?
