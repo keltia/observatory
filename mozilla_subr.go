@@ -187,6 +187,12 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 			c.last = &ar
 			return &ar, errors.Wrap(err, "unmarshall")
 		}
+		if strings.Contains(string(raw), `"error":`) {
+			c.debug("ERROR")
+			c.debug("raw/analyse=%s", string(raw))
+
+			return &ar, errors.Errorf("returned: %v", string(raw))
+		}
 		c.debug("loop retry=%d", retry)
 	}
 }
