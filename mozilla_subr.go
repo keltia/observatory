@@ -174,8 +174,8 @@ func (c *Client) getAnalyze(site string, force bool) (*Analyze, error) {
 			c.debug("FAILED retry=%d", retry)
 			c.debug("raw/analyse=%s", string(raw))
 
-			err := json.Unmarshal(raw, &ar)
-			return &ar, errors.Wrap(err, "unmarshall")
+			_ = json.Unmarshal(raw, &ar)
+			return &ar, errors.New("site analysis failed")
 		}
 
 		if strings.Contains(string(raw), `state":"FINISHED"`) {
