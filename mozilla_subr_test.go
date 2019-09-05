@@ -296,6 +296,51 @@ func TestClient_GetAnalyse2(t *testing.T) {
 	t.Logf("error=%v raw=%v", err, raw)
 }
 
+func TestClient_GetAnalyse_Error(t *testing.T) {
+	defer gock.Off()
+
+	site := "www.ssllabs.com"
+
+	ftr, err := ioutil.ReadFile("testdata/ssllabs-post.json")
+	assert.NoError(t, err)
+
+	ftc, err := ioutil.ReadFile("testdata/ssllabs-error.json")
+	assert.NoError(t, err)
+
+	gock.New(baseURL).
+		Post("analyze").
+		MatchParam("host", site).
+		MatchHeaders(map[string]string{
+			"content-type": "application/json",
+			"accept":       "application/json",
+		}).
+		BodyString("hidden=true&rescan=true").
+		Reply(200).
+		BodyString(string(ftr))
+
+	gock.New(baseURL).
+		Get("analyze").
+		MatchParam("host", site).
+		Reply(200).
+		BodyString(string(ftc))
+
+	c, err := NewClient(Config{Timeout: 10, Log: 2})
+	assert.NoError(t, err)
+	assert.Equal(t, baseURL, c.baseurl)
+
+	gock.InterceptClient(c.client)
+	defer gock.RestoreClient(c.client)
+
+	var report Analyze
+
+	err = json.Unmarshal(ftc, &report)
+	require.NoError(t, err)
+
+	ret, err := c.getAnalyze(site, true)
+	assert.Error(t, err)
+	assert.EqualValues(t, &report, ret)
+}
+
 func TestClient_GetAnalyseEmpty(t *testing.T) {
 	defer gock.Off()
 

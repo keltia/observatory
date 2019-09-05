@@ -56,6 +56,9 @@ func main() {
 		fVerbose = true
 	}
 
+	fmt.Printf("%s Wrapper: %s API version %s\n\n",
+		MyName, MyVersion, observatory.Version())
+
 	// Setup client
 	c, err := observatory.NewClient(observatory.Config{Log: level})
 	if err != nil {
@@ -80,8 +83,6 @@ func main() {
 		// Just dump the json
 		fmt.Printf("%s\n", report)
 	} else {
-		fmt.Printf("%s Wrapper: %s API version %s\n\n",
-			MyName, MyVersion, observatory.Version())
 		grade, err := c.GetGrade(site)
 		if err != nil {
 			log.Fatalf("impossible to get grade for '%s': %v\n", site, err)
